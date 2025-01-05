@@ -1,5 +1,5 @@
 import React from "react";
-import { FileText, Medal, Crosshair, Info } from "lucide-react";
+import { FileText, Medal, Crosshair, Info, Bookmark } from "lucide-react";
 
 interface ProfileTabsProps {
   activeTab: string;
@@ -12,6 +12,11 @@ export function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps) {
       id: "posts",
       label: "Publications",
       icon: <FileText className="w-4 h-4" />,
+    },
+    {
+      id: "bookmark",
+      label: "Enregistrements",
+      icon: <Bookmark className="w-4 h-4" />,
     },
     {
       id: "achievements",

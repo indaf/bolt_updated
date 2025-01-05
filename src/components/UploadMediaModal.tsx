@@ -38,7 +38,7 @@ export function UploadMediaModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-100 ">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[999] ">
       <div className="bg-[#202123] rounded-lg w-full max-w-md p-6 relative">
         <div className="text-center">
           <h2 className="text-xl font-semibold text-white mb-4">

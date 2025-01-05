@@ -43,6 +43,7 @@ export function ProfileActions({
       <button
         onClick={onFriendAction}
         disabled={hasPendingRequest}
+        title={isFriend ? "Se désabonner" : "S'abonner"}
         className={`
           p-2 rounded-lg transition-colors
           ${
@@ -63,6 +64,7 @@ export function ProfileActions({
       {isFriend && (
         <button
           onClick={onSourdineAction}
+          title={isMuted ? "Enlever la sourdine" : "Mettre en sourdine"}
           className={`
             p-2 rounded-lg transition-colors
             ${

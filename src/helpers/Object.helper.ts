@@ -140,3 +140,88 @@ export const calculateStatsAdaptivePerUser = (results: any) => {
   });
   return userStats;
 };
+
+export const calculateStatsPerExercice = (results: any) => {
+  let exStats: Array<any> = [];
+
+  results.forEach((result: any) => {
+    if (
+      exStats.filter((r: any) => r.exId == result.data.exercice_id).length == 0
+    ) {
+      exStats.push({
+        exId: result.data.exercice_id,
+        name: result.data.name,
+        displayed: 0,
+      });
+    }
+    let index = exStats.findIndex(
+      (u: any) => u.exId == result.data.exercice_id
+    );
+    exStats[index].displayed += 1;
+  });
+
+  return exStats;
+};
+
+export const calculateStatsPerConsigne = (results: any) => {
+  let exStats: Array<any> = [];
+
+  results.forEach((result: any) => {
+    if (
+      exStats.filter(
+        (r: any) =>
+          r.name ==
+          result.data.instruction.target +
+            " - " +
+            result.data.instruction.direction
+      ).length == 0
+    ) {
+      exStats.push({
+        name:
+          result.data.instruction.target +
+          " - " +
+          result.data.instruction.direction,
+        displayed: 0,
+        forme: result.data.instruction.target,
+        direction: result.data.instruction.direction,
+      });
+    }
+    let index = exStats.findIndex(
+      (u: any) =>
+        u.name ==
+        result.data.instruction.target +
+          " - " +
+          result.data.instruction.direction
+    );
+    console.log(index);
+    exStats[index].displayed += 1;
+  });
+
+  return exStats;
+};
+
+export const calculateStatsTempoPerUser = (results: any) => {
+  let userStats: Array<any> = [];
+
+  results.forEach((result: any) => {
+    if (
+      userStats.filter((r: any) => r.user?.id == result.user?.id).length == 0
+    ) {
+      userStats.push({
+        userId: result.user.id,
+        name: `${result.user.first_name} ${result.user.last_name}`,
+        gamesPlayed: 0,
+        avgAccuracy: 0,
+      });
+    }
+    let index = userStats.findIndex((u: any) => u.userId == result.user.id);
+    userStats[index].gamesPlayed += 1;
+    userStats[index].avgAccuracy += result.score;
+  });
+
+  userStats.forEach((user: any) => {
+    user.avgAccuracy =
+      user.gamesPlayed > 0 ? user.avgAccuracy / user.gamesPlayed : 0;
+  });
+  return userStats;
+};

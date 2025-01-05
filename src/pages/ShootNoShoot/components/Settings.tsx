@@ -67,7 +67,9 @@ export function Settings({ onStart, tags }: SettingsProps) {
               />
               <div className="flex justify-between text-sm text-gray-400 mt-2">
                 <span>0.5s</span>
-                <span>{settings.timeLimit}s</span>
+                <span className="text-[#009B70] font-bold">
+                  {settings.timeLimit}s
+                </span>
                 <span>4.0s</span>
               </div>
             </div>
@@ -95,7 +97,9 @@ export function Settings({ onStart, tags }: SettingsProps) {
               />
               <div className="flex justify-between text-sm text-gray-400 mt-2">
                 <span>10%</span>
-                <span>{settings.threatRatio}%</span>
+                <span className="text-[#009B70] font-bold">
+                  {settings.threatRatio}%
+                </span>
                 <span>90%</span>
               </div>
             </div>
@@ -123,7 +127,9 @@ export function Settings({ onStart, tags }: SettingsProps) {
               />
               <div className="flex justify-between text-sm text-gray-400 mt-2">
                 <span>20</span>
-                <span>{settings.imagesCount}</span>
+                <span className="text-[#009B70] font-bold">
+                  {settings.imagesCount}
+                </span>
                 <span>100</span>
               </div>
             </div>

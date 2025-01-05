@@ -34,7 +34,7 @@ export function Game({
   const [startTime, setStartTime] = useState<number>(0);
   const [remainingTargets, setRemainingTargets] = useState<any[]>([]);
   const [gamePhase, setGamePhase] = useState<
-    "initial-countdown" | "playing" | "failed"
+    "initial-countdown" | "playing" | "failed" | "failed-civil"
   >("initial-countdown");
   const [timer, setTimer] = useState<number>(INITIAL_COUNTDOWN);
 
@@ -79,7 +79,6 @@ export function Game({
 
     const reactionTime = (Date.now() - startTime) / 1000;
     if (shoot == currentTarget.is_threat) {
-      console.log(currentTarget);
       setStats((prev) => ({
         ...prev,
         correct: prev.correct + 1,
@@ -91,6 +90,7 @@ export function Game({
         processedImages: prev.processedImages + 1,
       }));
     } else {
+      setGamePhase("failed-civil");
       setStats((prev) => ({
         ...prev,
         incorrect: prev.incorrect + 1,
@@ -191,12 +191,14 @@ export function Game({
     return () => window.removeEventListener("keypress", handleKeyPress);
   }, [handleKeyPress]);
 
-  if (gamePhase === "failed") {
+  if (gamePhase === "failed" || gamePhase === "failed-civil") {
     return (
       <div className="max-w-md mx-auto text-center">
         <h2 className="text-4xl font-bold text-red-500 mb-8">ÉCHEC</h2>
         <p className="text-lg text-gray-300 mb-8">
-          Vous n'avez pas neutralisé la menace à temps.
+          {gamePhase === "failed"
+            ? "Vous n'avez pas neutralisé la menace à temps."
+            : "Vous avez neutralisé un civil."}
         </p>
         <div className="flex justify-center gap-4">
           <button
@@ -246,7 +248,7 @@ export function Game({
           <img
             src={import.meta.env.VITE_SERVICE_API_URL + currentTarget.url}
             alt="Target"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-contain"
           />
         )}
         {gamePhase === "initial-countdown" && (

@@ -55,6 +55,46 @@ export const calculateChartDataForAdaptive = (results: any) => {
   return dailyStats;
 };
 
+export const calculateChartDataForConsignes = (results: any) => {
+  let dailyStats: Array<any> = [];
+  results.forEach((ex: any) => {
+    let currDate = new Date(ex.date).toLocaleDateString();
+    if (dailyStats.filter((stat: any) => stat.date == currDate).length > 0) {
+      let index = dailyStats.findIndex((stat: any) => stat.date == currDate);
+      dailyStats[index].games += 1;
+    } else {
+      dailyStats.push({
+        date: currDate,
+        games: 1,
+      });
+    }
+  });
+  return dailyStats;
+};
+
+export const calculateChartDataForTempo = (results: any) => {
+  let dailyStats: Array<any> = [];
+  results.forEach((ex: any) => {
+    let currDate = new Date(ex.date).toLocaleDateString();
+    if (dailyStats.filter((stat: any) => stat.date == currDate).length > 0) {
+      let index = dailyStats.findIndex((stat: any) => stat.date == currDate);
+      dailyStats[index].games += 1;
+      dailyStats[index].accuracy += ex.score;
+    } else {
+      dailyStats.push({
+        date: currDate,
+        games: 1,
+        accuracy: ex.score,
+      });
+    }
+  });
+  dailyStats = dailyStats.map((stat: any) => {
+    stat.accuracy = (stat.accuracy / stat.games).toFixed(2);
+    return stat;
+  });
+  return dailyStats;
+};
+
 export const calculateChartForShootNoShoot = (results: any) => {
   let dailyStats: Array<any> = [];
   results.forEach((ex: any) => {

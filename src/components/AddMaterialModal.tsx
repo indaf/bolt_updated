@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { CheckCircle2, Search } from "lucide-react";
+import { CheckCircle2, Search, X } from "lucide-react";
 import { Input } from "./common/Input";
 import { searchWeapons } from "../services/Weapon/weapon.service";
 import { AxiosResponse } from "axios";
@@ -48,8 +48,14 @@ export function AddMaterialModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9000] ">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9000]">
       <div className="bg-[#202123] rounded-lg w-full max-w-md p-6 relative">
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 text-gray-400 hover:text-white"
+        >
+          <X className="w-5 h-5" />
+        </button>
         <div className="text-center">
           <h2 className="text-xl font-semibold text-white mb-4">
             Rechercher un matériel
@@ -71,7 +77,8 @@ export function AddMaterialModal({
             foundWeapons.map((weapon: any, index: number) => (
               <div
                 key={index}
-                className="bg-[#202123] rounded-lg p-2 flex justify-between items-center w-full"
+                onClick={() => setWeaponId(weapon.id)}
+                className="bg-[#202123] rounded-lg p-2 flex border-transparent justify-between items-center border-[1px] w-full hover:border-[#009B70] cursor-pointer"
               >
                 <div className="flex items-center gap-1">
                   <div>
@@ -99,7 +106,7 @@ export function AddMaterialModal({
             onClick={onClose}
             className="flex items-center gap-2 px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors"
           >
-            Fermer
+            Annuler
           </button>
           <div className="flex-1" />
           <button

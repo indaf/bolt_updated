@@ -5,6 +5,9 @@ import {
   ChevronRight,
   Gamepad,
   Shield,
+  Clock,
+  ListChecksIcon,
+  ArrowLeftRight,
 } from "lucide-react";
 import Layout from "../components/Layout";
 import { useNavigate } from "react-router-dom";
@@ -41,13 +44,29 @@ export function Applications() {
       available: true,
     },
     {
-      id: "mental",
-      name: "Entraînement mental",
-      description: "Exercices de visualisation et de préparation mentale.",
-      icon: <Brain className="w-8 h-8 text-purple-500" />,
+      id: "tempo",
+      name: "Tempo Shooting",
+      description: "Entraînez votre précision temporelle en suivant le rythme.",
+      icon: <Clock className="w-6 h-6" />,
       color: "from-purple-500/20 to-purple-500/5",
-      available: false,
-      comingSoon: true,
+      available: true,
+    },
+    {
+      id: "exercise-list",
+      name: "Annuaire d'exercices",
+      description: "Une liste d'exercices pour vous entraîner.",
+      icon: <ListChecksIcon className="w-6 h-6" />,
+      color: "from-purple-500/20 to-purple-500/5",
+      available: true,
+    },
+    {
+      id: "target-instructions",
+      name: "Générateur de Consignes",
+      description:
+        "Générez des consignes aléatoires pour l'entraînement au tir sur cibles.",
+      icon: <ArrowLeftRight className="w-6 h-6" />,
+      color: "from-amber-500/20 to-amber-500/5",
+      available: true,
     },
   ];
 

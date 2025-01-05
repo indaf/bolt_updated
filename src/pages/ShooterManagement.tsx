@@ -24,6 +24,7 @@ import Layout from "../components/Layout";
 import { getAllShooters, updateUserById } from "../services/Auth/Auth.service";
 import { notifyError, notifySuccess } from "../helpers/Notify.helper";
 import { AxiosResponse } from "axios";
+import { useNavigate } from "react-router-dom";
 
 export function ShooterManagement() {
   const [shooters, setShooters] = useState<Array<any>>([]);
@@ -37,6 +38,7 @@ export function ShooterManagement() {
   >("all");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pendingInstructors, setPendingInstructors] = useState<Array<any>>([]);
+  const navigate = useNavigate();
 
   const filteredUsers = shooters.filter((user) => {
     const matchesSearch = `${user.first_name} ${user.last_name} ${user.email} ${
@@ -171,7 +173,12 @@ export function ShooterManagement() {
                               </span>
                             </div>
                             <div>
-                              <p className="text-sm font-medium text-white">
+                              <p
+                                className="text-sm font-medium text-[#009B70] cursor-pointer hover:underline"
+                                onClick={() =>
+                                  navigate(`/profile/${instructor.id}`)
+                                }
+                              >
                                 {instructor.first_name} {instructor.last_name}
                               </p>
                             </div>
@@ -286,7 +293,10 @@ export function ShooterManagement() {
                             </span>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-white">
+                            <p
+                              className="text-sm font-medium text-[#009B70] cursor-pointer hover:underline"
+                              onClick={() => navigate(`/profile/${user.id}`)}
+                            >
                               {user.first_name} {user.last_name}
                             </p>
                           </div>

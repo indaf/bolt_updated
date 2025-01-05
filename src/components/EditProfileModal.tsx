@@ -133,12 +133,12 @@ export function EditProfileModal({
           </button>
 
           <h2 className="text-xl font-semibold text-white mb-6">
-            Modifier les photos
+            Modifier le profil
           </h2>
 
           <div className="space-y-8">
             {/* Bannière */}
-            <div>
+            {/* <div>
               <h3 className="text-lg font-medium text-white mb-2">
                 Photo de bannière
               </h3>
@@ -219,7 +219,7 @@ export function EditProfileModal({
                   </button>
                 )}
               </div>
-            </div>
+            </div> */}
 
             {/* Avatar */}
             <div>

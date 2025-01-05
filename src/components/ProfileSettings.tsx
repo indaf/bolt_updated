@@ -71,7 +71,7 @@ export function ProfileSettings({
         />
       </div>
       {/* Localisation */}
-      <div className="bg-[#202123] rounded-lg p-6">
+      {/* <div className="bg-[#202123] rounded-lg p-6">
         <h3 className="text-lg font-medium text-white mb-4">Localisation</h3>
         <div className="flex items-center gap-3">
           <MapPin className="w-5 h-5 text-gray-400" />
@@ -85,7 +85,7 @@ export function ProfileSettings({
                      text-white placeholder-gray-400 focus:outline-none focus:border-[#009B70]"
           />
         </div>
-      </div>
+      </div> */}
 
       {/* Site web */}
       <div className="bg-[#202123] rounded-lg p-6">
@@ -105,7 +105,7 @@ export function ProfileSettings({
       </div>
 
       {/* Réseaux sociaux */}
-      <div className="bg-[#202123] rounded-lg p-6">
+      {/* <div className="bg-[#202123] rounded-lg p-6">
         <h3 className="text-lg font-medium text-white mb-4">Réseaux sociaux</h3>
         <div className="space-y-4">
           <div className="flex items-center gap-3">
@@ -157,7 +157,7 @@ export function ProfileSettings({
             />
           </div>
         </div>
-      </div>
+      </div> */}
       {isOwner && (
         <button
           onClick={() => handleSave()}

@@ -16,6 +16,15 @@ import { BackApps } from "../pages/BackApps";
 import { BackMatrix } from "../pages/BackApps/BackMatrix";
 import { BackAdaptiveOne } from "../pages/BackApps/BackAdaptiveOne";
 import { BackShootNoShoot } from "../pages/BackApps/BackShootNoShoot";
+import { DetailPost } from "../pages/DetailPost";
+import { TempoShooting } from "../pages/TempoShooting";
+import { BackTempo } from "../pages/BackApps/BackTempo";
+import { ReportManagement } from "../pages/ReportManagement";
+import { Shop } from "../pages/Shop";
+import { ListExercice } from "../pages/ListExercices";
+import { TargetInstructions } from "../pages/TargetInstructions";
+import { BackAnnuaire } from "../pages/BackApps/BackAnnuaire";
+import { BackConsignes } from "../pages/BackApps/BackConsignes";
 
 const Routing = () => {
   return (
@@ -34,10 +43,19 @@ const Routing = () => {
         <Route path="*" element={<LandingPage />} />
         <Route path="/shootnoshoot" element={<ShootNoShoot />} />
         <Route path="/shooters" element={<ShooterManagement />} />
+        <Route path="/moderation" element={<ReportManagement />} />
         <Route path="/back-apps" element={<BackApps />} />
         <Route path="/back-matrix" element={<BackMatrix />} />
         <Route path="/back-adaptive" element={<BackAdaptiveOne />} />
         <Route path="/back-shootnoshoot" element={<BackShootNoShoot />} />
+        <Route path="/back-tempo" element={<BackTempo />} />
+        <Route path="/post/:id" element={<DetailPost />} />
+        <Route path="/tempo" element={<TempoShooting />} />
+        <Route path="/exercise-list" element={<ListExercice />} />
+        <Route path="/target-instructions" element={<TargetInstructions />} />
+        <Route path="/back-annuaire" element={<BackAnnuaire />} />
+        <Route path="back-consignes" element={<BackConsignes />} />
+        {/* <Route path="/shop" element={<Shop />} /> */}
       </Routes>
     </BrowserRouter>
   );

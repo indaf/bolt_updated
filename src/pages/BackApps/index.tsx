@@ -1,5 +1,14 @@
 import React from "react";
-import { Target, Gamepad, Shield, Brain, ChevronRight } from "lucide-react";
+import {
+  Target,
+  Gamepad,
+  Shield,
+  Brain,
+  ChevronRight,
+  Clock,
+  ListChecksIcon,
+  ArrowLeftRight,
+} from "lucide-react";
 import { AppHeader } from "../../components/AppHeader";
 import Layout from "../../components/Layout";
 import { useNavigate } from "react-router-dom";
@@ -33,12 +42,29 @@ export function BackApps() {
       route: "/back-shootnoshoot",
     },
     {
-      id: "mental",
-      name: "Entraînement mental",
-      description: "Configuration et suivi des exercices mentaux.",
-      icon: <Brain className="w-8 h-8 text-purple-500" />,
+      id: "tempo",
+      name: "Tempo Shooting",
+      description: "Configuration et suivi des exercices de tir rythmé.",
+      icon: <Clock className="w-8 h-8 text-purple-500" />,
       color: "from-purple-500/20 to-purple-500/5",
-      route: "/back-mental",
+      route: "/back-tempo",
+    },
+    {
+      id: "annuaire",
+      name: "Annuaire d'exercices",
+      description: "Une liste d'exercices pour vous entraîner.",
+      icon: <ListChecksIcon className="w-8 h-8 text-purple-500" />,
+      color: "from-purple-500/20 to-purple-500/5",
+      route: "/back-annuaire",
+    },
+    {
+      id: "consignes",
+      name: "Générateur de Consignes",
+      description:
+        "Générez des consignes aléatoires pour l'entraînement au tir sur cibles.",
+      icon: <ArrowLeftRight className="w-8 h-8 text-amber-500" />,
+      color: "from-amber-500/20 to-amber-500/5",
+      route: "/back-consignes",
     },
   ];
 

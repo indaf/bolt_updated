@@ -1,6 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
-import { useAuthStore } from "../store/authStore";
-import { useProfileStore } from "../store/profileStore";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { PostCard } from "../components/PostCard";
 import { Search } from "lucide-react";
 import { DiscoverFilters } from "../components/DiscoverFilters";
@@ -13,6 +11,13 @@ import {
 import { AxiosResponse } from "axios";
 import { notifyError } from "../helpers/Notify.helper";
 import { ICON_ACHIEVEMENTS } from "../const/ACHIEVEMENT.const";
+import { getUserProfile } from "../services/Profile/profile.service";
+import {
+  getFriendsPublications,
+  getPublicPublications,
+} from "../services/Publication/publication.service";
+import { searchProfile } from "../services/Auth/Auth.service";
+import { useNavigate } from "react-router-dom";
 
 type FilterType = "all" | "suggestions" | "following" | "achievements";
 
@@ -22,12 +27,53 @@ export function Discover() {
   const [filter, setFilter] = useState<FilterType>("all");
   const [activitySubscriber, setActivitySubscriber] = useState<Array<any>>([]);
   const [activityPublic, setActivityPublic] = useState<Array<any>>([]);
+  const [publicPosts, setPublicPosts] = useState<Array<any>>([]);
+  const [friendsPost, setFriendsPost] = useState<Array<any>>([]);
   const [allActivities, setAllActivities] = useState<Array<any>>([]);
+  const [profile, setProfile] = useState<any>(null);
+  const toSearch = useRef<any>(null);
+  const [foundProfile, setFoundProfile] = useState<Array<any>>([]);
+  const navigate = useNavigate();
+
+  const loadCurrentUserProfile = () => {
+    if (user) {
+      getUserProfile(user.id)
+        .then((response: AxiosResponse) => {
+          setProfile(response.data.profile);
+        })
+        .catch((error: any) => {
+          console.error(error);
+          notifyError("Erreur lors de la récupération de votre profil");
+        });
+    }
+  };
+
+  useEffect(() => {
+    if (searchTerm[0] == "@") {
+      if (searchTerm.length > 3) {
+        clearTimeout(toSearch.current);
+        toSearch.current = setTimeout(() => {
+          clearTimeout(toSearch.current);
+          searchProfile(searchTerm.slice(1))
+            .then((response: AxiosResponse) => {
+              setFoundProfile(response.data);
+            })
+            .catch((error: any) => {
+              console.error(error);
+              notifyError("Erreur lors de la recherche de profil");
+            });
+        }, 500);
+      } else {
+        clearTimeout(toSearch.current);
+      }
+    }
+  }, [searchTerm]);
 
   const loadPublicAchievements = () => {
     getPublicAchievements()
       .then((response: AxiosResponse) => {
         setActivityPublic(response.data);
+        console.log(response.data);
       })
       .catch((error: any) => {
         console.error(error);
@@ -64,6 +110,7 @@ export function Discover() {
         if (post.publications.length > 0) {
           post.publications.forEach((pub: any) => {
             all.push({
+              id: pub.id,
               type: "post",
               data: pub,
               user: user,
@@ -88,6 +135,7 @@ export function Discover() {
         if (post.publications.length > 0) {
           post.publications.forEach((pub: any) => {
             all.push({
+              id: pub.id,
               type: "post",
               data: pub,
               user: user,
@@ -116,6 +164,7 @@ export function Discover() {
         if (achievement.achievements.length > 0) {
           achievement.achievements.forEach((ach: any) => {
             all.push({
+              id: ach.id,
               type: "achievement",
               data: ach,
               user: user,
@@ -144,6 +193,7 @@ export function Discover() {
         if (achievement.achievements.length > 0) {
           achievement.achievements.forEach((ach: any) => {
             all.push({
+              id: ach.id,
               type: "achievement",
               data: ach,
               user: user,
@@ -152,20 +202,30 @@ export function Discover() {
         }
       });
     }
-    setAllActivities(all);
+
+    const uniqueActivities = all.filter(
+      (activity, index, self) =>
+        index ===
+        self.findIndex((a) => a.id === activity.id && a.type === activity.type)
+    );
+    setAllActivities(uniqueActivities);
   };
 
   useEffect(() => {
     loadPublicAchievements();
     loadFriendsAchievements();
+    loadCurrentUserProfile();
+    // loadPublicPosts();
+    // loadFriendPost();
   }, []);
 
   useEffect(() => {
+    setAllActivities([]);
     formatAllActivities();
   }, [activitySubscriber, activityPublic, filter, searchTerm]);
 
   return (
-    <Layout pageTitle="Découvrir">
+    <Layout pageTitle="Accueil">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           {/* Barre de recherche */}
@@ -180,6 +240,32 @@ export function Discover() {
                 className="w-full pl-9 pr-3 py-2 bg-[#202123] border border-gray-700 rounded-lg
                         text-sm text-white placeholder-gray-400 focus:outline-none focus:border-[#009B70]"
               />
+              {searchTerm.length > 3 && foundProfile.length > 0 && (
+                <div className="absolute top-full bg-[#202123] w-full h-[500px] rounded-xl">
+                  {foundProfile.map((profile: any) => (
+                    <div
+                      key={profile.id}
+                      onClick={() => navigate(`/profile/${profile.id}`)}
+                      className="flex items-center gap-4 p-4 border-b cursor-pointer hover:bg-[#343541] border-b-[#343541]"
+                    >
+                      <img
+                        src={
+                          import.meta.env.VITE_SERVICE_API_URL + profile.avatar
+                        }
+                        alt={`${profile.first_name} ${profile.last_name}`}
+                        className="w-12 h-12 rounded-full"
+                      />
+                      <div>
+                        <p className="text-white">
+                          <span className="font-medium">
+                            {profile.first_name} {profile.last_name}
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -199,9 +285,15 @@ export function Discover() {
                 >
                   {activity.type === "post" ? (
                     <PostCard
-                      refreshPublication={() => {}}
+                      key={activity.id}
+                      refreshPublication={() => {
+                        loadCurrentUserProfile();
+                        loadPublicAchievements();
+                        loadFriendsAchievements();
+                      }}
                       post={activity.data}
                       currentUserId={user.id}
+                      currentUserProfile={profile}
                     />
                   ) : (
                     <AchievementCard
@@ -252,7 +344,7 @@ function AchievementCard({
       <div className="flex items-center gap-4 mb-4">
         {user.avatar ? (
           <img
-            src={user.avatar}
+            src={import.meta.env.VITE_SERVICE_API_URL + user.avatar}
             alt={`${user.first_name} ${user.last_name}`}
             className="w-12 h-12 rounded-full"
           />

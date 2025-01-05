@@ -80,7 +80,7 @@ export function NotificationsMenu({
       </button>
 
       {isOpen && (
-        <div className="absolute right-[-25vw] mt-2 w-96 bg-[#202123] rounded-lg shadow-lg py-2 z-50">
+        <div className="absolute right-full mt-2 w-96 bg-[#202123] rounded-lg shadow-lg py-2 z-50">
           <div className="px-4 py-2 border-b border-[#343541] flex items-center justify-between">
             <h3 className="text-sm font-medium text-white">Notifications</h3>
             {notifications.length > 0 && (

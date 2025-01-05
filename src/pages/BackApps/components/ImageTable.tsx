@@ -55,8 +55,6 @@ export function ImageTable({ results }: ImageTableProps) {
   const [tags, setTags] = useState<Array<any>>([]);
   const [allImages, setAllImages] = useState<Array<any>>([]);
 
-  console.log(results);
-
   useEffect(() => {
     loadAllImages();
     loadAllTags();
@@ -147,7 +145,6 @@ export function ImageTable({ results }: ImageTableProps) {
     getTags()
       .then((response: AxiosResponse) => {
         setTags(response.data);
-        console.log(response.data);
       })
       .catch((error: any) => {
         console.error(error);
@@ -503,7 +500,7 @@ export function ImageTable({ results }: ImageTableProps) {
                   {retrieveImageClick(image.id)}
                 </td>
                 <td className="px-4 py-3 text-white">
-                  {retrieveImageTimeReaction(image.id)}s
+                  {retrieveImageTimeReaction(image.id).toFixed(2)}s
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">

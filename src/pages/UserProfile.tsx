@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext } from "react";
 import { ProfileHeader } from "../components/ProfileHeader";
 import { ProfileTabs } from "../components/ProfileTabs";
 import { AchievementsCarousel } from "../components/AchievementsCarousel";
-import { ExperienceBar } from "../components/ExperienceBar";
 import { ProfilePosts } from "../components/ProfilePosts";
 import { ProfileAchievements } from "../components/ProfileAchievements";
 import { ProfileSetup } from "../components/ProfileSetup";
@@ -13,6 +12,7 @@ import { useParams } from "react-router-dom";
 import { getUserProfile } from "../services/Profile/profile.service";
 import { notifyError } from "../helpers/Notify.helper";
 import { AxiosResponse } from "axios";
+import { ProfileSavedPosts } from "../components/ProfileSavedPosts";
 
 export function UserProfile() {
   const { user } = useContext<any>(AuthContext);
@@ -22,7 +22,7 @@ export function UserProfile() {
   const [isFriendOrPublic, setIsFriendOrPublic] = useState<boolean>(false);
 
   const [activeTab, setActiveTab] = useState<
-    "posts" | "achievements" | "setup" | "settings"
+    "posts" | "achievements" | "setup" | "settings" | "bookmark"
   >("posts");
 
   useEffect(() => {
@@ -80,6 +80,14 @@ export function UserProfile() {
             loadUserProfile={loadUserProfile}
           />
         );
+      case "bookmark":
+        return (
+          <ProfileSavedPosts
+            profile={profile}
+            currentUserId={user.id}
+            refreshPublication={loadUserProfile}
+          />
+        );
     }
   };
 
@@ -96,12 +104,6 @@ export function UserProfile() {
           {profile.user.achievements?.length > 0 && (
             <AchievementsCarousel achievements={profile.user.achievements} />
           )}
-
-          <ExperienceBar
-            xp={profile.user?.xp}
-            level={profile.user?.level}
-            nextLevelXp={profile.user?.next_level_xp}
-          />
           {isFriendOrPublic == true ? (
             <>
               <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />

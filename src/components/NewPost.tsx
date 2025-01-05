@@ -58,7 +58,6 @@ export function NewPost({ userId, refreshPublication }: NewPostProps) {
     }
     createPublication({ content, medias: medias.map((m: any) => m.id) })
       .then((response: AxiosResponse) => {
-        console.log(response);
         setFile([]);
         setContent("");
         setReadedFile([]);

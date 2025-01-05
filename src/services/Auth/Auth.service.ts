@@ -74,3 +74,7 @@ export const deleteWeaponFromUser = (userId: number, weaponId: number) => {
 export const searchShooter = (search: string) => {
   return API.get(`/user/search-shooter?query=${search}`);
 };
+
+export const searchProfile = (search: string) => {
+  return API.get(`/user/search?query=${search}`);
+};

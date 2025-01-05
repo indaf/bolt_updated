@@ -10,6 +10,8 @@ import {
 } from "lucide-react";
 import { AuthContext } from "../context/Auth.context";
 import { useLocation, useNavigate } from "react-router-dom";
+import { CiWarning } from "react-icons/ci";
+import { BiCart } from "react-icons/bi";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -42,7 +44,7 @@ export function Sidebar({
   const commonMenuItems = [
     {
       id: "discover",
-      label: "Découvrir",
+      label: "Accueil",
       icon: <Compass className="w-5 h-5" />,
     },
     {
@@ -60,6 +62,11 @@ export function Sidebar({
     //   label: "Tchat",
     //   icon: <MessageCircle className="w-5 h-5" />,
     // },
+    // {
+    //   id: "shop",
+    //   label: "Boutique",
+    //   icon: <BiCart className="w-5 h-5" />,
+    // },
     {
       id: "apps",
       label: "Applications",
@@ -67,16 +74,19 @@ export function Sidebar({
     },
   ];
 
-  const instructorMenuItems = [
+  const instructorMenuItems: Array<any> = [];
+
+  const adminMenuItems = [
     {
       id: "shooters",
       label: "Mes contacts",
       icon: <Users className="w-5 h-5" />,
-      restricted: isInstructor && !hasInstructorAccess,
     },
-  ];
-
-  const adminMenuItems = [
+    {
+      id: "moderation",
+      label: "Modération",
+      icon: <CiWarning className="w-5 h-5" />,
+    },
     {
       id: "back-apps",
       label: "Back Apps",
@@ -108,7 +118,7 @@ export function Sidebar({
               className={`
                 w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors
                 ${
-                  location.pathname === item.id
+                  location.pathname === "/" + item.id
                     ? "bg-[#009B70] text-white"
                     : "text-gray-400 hover:bg-[#2A2B32] hover:text-white"
                 }

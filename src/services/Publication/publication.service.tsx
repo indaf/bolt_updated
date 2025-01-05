@@ -15,3 +15,19 @@ export const getFriendsPublications = () => {
 export const getPublicPublications = () => {
   return API.get("/publication/public/");
 };
+
+export const getPublicationById = (id: number) => {
+  return API.get(`/publication/${id}`);
+};
+
+export const updatePublicationById = (id: number, data: any) => {
+  return API.put(`/publication/update/${id}`, data);
+};
+
+export const deletePublication = (id: number) => {
+  return API.delete(`/publication/delete/${id}`);
+};
+
+export const getSavedByUser = () => {
+  return API.get("/publication/saved/");
+};

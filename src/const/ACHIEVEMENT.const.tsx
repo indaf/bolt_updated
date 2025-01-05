@@ -1,6 +1,6 @@
 import { SiLevelsdotfyi } from "react-icons/si";
 import { MdOutlinePostAdd } from "react-icons/md";
-import { FaCommentDots } from "react-icons/fa";
+import { FaCommentDots, FaThumbsUp } from "react-icons/fa";
 import { FaUserFriends } from "react-icons/fa";
 import { FaGamepad } from "react-icons/fa";
 import { FaRankingStar } from "react-icons/fa6";
@@ -29,5 +29,9 @@ export const ICON_ACHIEVEMENTS = [
   {
     type: "rank",
     icon: <FaRankingStar />,
+  },
+  {
+    type: "like",
+    icon: <FaThumbsUp />,
   },
 ];
