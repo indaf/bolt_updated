@@ -25,6 +25,7 @@ import { ListExercice } from "../pages/ListExercices";
 import { TargetInstructions } from "../pages/TargetInstructions";
 import { BackAnnuaire } from "../pages/BackApps/BackAnnuaire";
 import { BackConsignes } from "../pages/BackApps/BackConsignes";
+import Links from "../pages/Links";
 
 const Routing = () => {
   return (
@@ -55,7 +56,8 @@ const Routing = () => {
         <Route path="/target-instructions" element={<TargetInstructions />} />
         <Route path="/back-annuaire" element={<BackAnnuaire />} />
         <Route path="back-consignes" element={<BackConsignes />} />
-        {/* <Route path="/shop" element={<Shop />} /> */}
+        <Route path="/links" element={<Links />} />
+        <Route path="/shop" element={<Shop />} />
       </Routes>
     </BrowserRouter>
   );

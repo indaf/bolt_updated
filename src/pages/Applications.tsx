@@ -11,9 +11,14 @@ import {
 } from "lucide-react";
 import Layout from "../components/Layout";
 import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { AuthContext } from "../context/Auth.context";
+import { notifyError } from "../helpers/Notify.helper";
+import { CiWarning } from "react-icons/ci";
 
 export function Applications() {
   const navigate = useNavigate();
+  const { user } = useContext<any>(AuthContext);
 
   const apps = [
     {
@@ -24,6 +29,7 @@ export function Applications() {
       icon: <Target className="w-8 h-8 text-[#DC002B]" />,
       color: "from-[#DC002B]/20 to-[#DC002B]/5",
       available: true,
+      roles: ["admin", "instructor"],
     },
     {
       id: "game",
@@ -33,6 +39,7 @@ export function Applications() {
       icon: <Gamepad className="w-8 h-8 text-[#009B70]" />,
       color: "from-[#009B70]/20 to-[#009B70]/5",
       available: true,
+      roles: [],
     },
     {
       id: "shootnoshoot",
@@ -42,6 +49,7 @@ export function Applications() {
       icon: <Shield className="w-8 h-8 text-blue-500" />,
       color: "from-blue-500/20 to-blue-500/5",
       available: true,
+      roles: [],
     },
     {
       id: "tempo",
@@ -50,14 +58,16 @@ export function Applications() {
       icon: <Clock className="w-6 h-6" />,
       color: "from-purple-500/20 to-purple-500/5",
       available: true,
+      roles: [],
     },
     {
       id: "exercise-list",
-      name: "Annuaire d'exercices",
+      name: "Exercices de tir",
       description: "Une liste d'exercices pour vous entraîner.",
       icon: <ListChecksIcon className="w-6 h-6" />,
       color: "from-purple-500/20 to-purple-500/5",
       available: true,
+      roles: [],
     },
     {
       id: "target-instructions",
@@ -67,8 +77,34 @@ export function Applications() {
       icon: <ArrowLeftRight className="w-6 h-6" />,
       color: "from-amber-500/20 to-amber-500/5",
       available: true,
+      roles: [],
     },
   ];
+
+  const hasAccess = (app: any) => {
+    if (app.roles && app.roles.length > 0) {
+      if (user.groups.some((role: any) => app.roles?.includes(role.name))) {
+        if (
+          app.roles?.includes("admin") &&
+          user.groups.some((role: any) => app.roles?.includes("admin"))
+        ) {
+          return true;
+        }
+        if (app.roles?.includes("instructor")) {
+          if (user.instructor_activated) {
+            return true;
+          } else {
+            return false;
+          }
+        }
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return true;
+    }
+  };
 
   return (
     <Layout pageTitle="Applications">
@@ -78,20 +114,29 @@ export function Applications() {
             Applications
           </h1>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
             {apps.map((app) => (
               <div
                 key={app.id}
                 className={`
                   relative bg-[#202123] rounded-lg p-6
-                  transition-transform duration-300 hover:scale-105
+                  transition-transform duration-300 hover:scale-105 relative
                   ${
                     app.available
                       ? "cursor-pointer"
                       : "cursor-not-allowed opacity-75"
                   }
                 `}
-                onClick={() => app.available && navigate("/" + app.id)}
+                onClick={() => {
+                  if (hasAccess(app)) {
+                    app.available && navigate("/" + app.id);
+                  }
+                }}
+                title={
+                  !hasAccess(app)
+                    ? "Vous n'avez pas les droits pour accéder à ce contenu."
+                    : ""
+                }
               >
                 <div
                   className={`w-16 h-16 rounded-lg bg-gradient-to-br ${app.color} 
@@ -110,14 +155,18 @@ export function Applications() {
                     Ouvrir l'application
                     <ChevronRight className="w-4 h-4" />
                   </button>
-                ) : app.comingSoon ? (
-                  <span className="text-sm text-yellow-500">
-                    Bientôt disponible
-                  </span>
                 ) : (
                   <span className="text-sm text-gray-500">
                     En développement
                   </span>
+                )}
+                {!hasAccess(app) && (
+                  <div className="absolute bg-black/40 opacity-80 top-0 left-0 right-0 bottom-0 z-30">
+                    <CiWarning
+                      className="w-8 h-8 text-red-500 right-10 top-10 absolute text-bold"
+                      title="Vous n'avez pas les droits pour accéder à ce contenu."
+                    />
+                  </div>
                 )}
               </div>
             ))}

@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { Pencil, Trash2, Search } from "lucide-react";
-import { Product } from "../../types/shop";
-// import { deleteProduct } from '../../services/Shop/product.service';
 import { notifyError, notifySuccess } from "../../helpers/Notify.helper";
 import { DeleteConfirmationModal } from "../DeleteConfirmationModal";
+import { deleteProduct } from "../../services/Shop/shop.service";
+import { EditProductModal } from "./EditProductModal";
 
 interface ManageProductsProps {
-  products: Product[];
+  products: any[];
   onProductUpdated: () => void;
 }
 
@@ -15,8 +15,9 @@ export function ManageProducts({
   onProductUpdated,
 }: ManageProductsProps) {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<any | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState<boolean>(false);
 
   const filteredProducts = products.filter(
     (product) =>
@@ -28,7 +29,7 @@ export function ManageProducts({
     if (!selectedProduct) return;
 
     try {
-      // await deleteProduct(parseInt(selectedProduct.id));
+      await deleteProduct(parseInt(selectedProduct.id));
       notifySuccess("Produit supprimé avec succès");
       onProductUpdated();
     } catch (error) {
@@ -73,6 +74,9 @@ export function ManageProducts({
                   Likes
                 </th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">
+                  Clicks
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-400">
                   Actions
                 </th>
               </tr>
@@ -84,7 +88,8 @@ export function ManageProducts({
                     <div className="w-16 h-10 rounded overflow-hidden">
                       <img
                         src={
-                          import.meta.env.VITE_SERVICE_API_URL + product.image
+                          import.meta.env.VITE_SERVICE_API_URL +
+                          product.image_path
                         }
                         alt={product.name}
                         className="w-full h-full object-cover"
@@ -99,18 +104,18 @@ export function ManageProducts({
                       </p>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-white">
-                    {product.price.toFixed(2)} €
-                  </td>
+                  <td className="px-4 py-3 text-white">{product.price} €</td>
                   <td className="px-4 py-3 text-white">
                     {product.likes.length}
                   </td>
+                  <td className="px-4 py-3 text-white">{product.clicks}</td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() =>
-                          notifyError("Fonctionnalité en développement")
-                        }
+                        onClick={() => {
+                          setSelectedProduct(product);
+                          setShowEditModal(true);
+                        }}
                         className="p-1 text-gray-400 hover:text-white transition-colors"
                       >
                         <Pencil className="w-4 h-4" />
@@ -132,6 +137,13 @@ export function ManageProducts({
           </table>
         </div>
       </div>
+
+      <EditProductModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        onProductEdited={onProductUpdated}
+        product={selectedProduct}
+      />
 
       <DeleteConfirmationModal
         isOpen={showDeleteModal}

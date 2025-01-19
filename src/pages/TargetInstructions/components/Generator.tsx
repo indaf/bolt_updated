@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
-import { Play, Volume2, VolumeX } from 'lucide-react';
-import { Instruction } from '../types';
-import { generateInstruction, formatInstruction, speakInstruction } from '../utils/instructionUtils';
+import React, { useState } from "react";
+import { Play, Volume2, VolumeX } from "lucide-react";
+import { Instruction } from "../types";
+import {
+  generateInstruction,
+  formatInstruction,
+  speakInstruction,
+} from "../utils/instructionUtils";
 
 interface GeneratorProps {
   onNewInstruction: (instruction: Instruction) => void;
@@ -9,14 +13,20 @@ interface GeneratorProps {
   onToggleSound: () => void;
 }
 
-export function Generator({ onNewInstruction, isSoundEnabled, onToggleSound }: GeneratorProps) {
-  const [currentInstruction, setCurrentInstruction] = useState<Instruction | null>(null);
+export function Generator({
+  onNewInstruction,
+  isSoundEnabled,
+  onToggleSound,
+}: GeneratorProps) {
+  const [currentInstruction, setCurrentInstruction] =
+    useState<Instruction | null>(null);
 
   const handleGenerate = () => {
     const instruction = generateInstruction();
+    console.log(instruction);
     setCurrentInstruction(instruction);
     onNewInstruction(instruction);
-    
+
     if (isSoundEnabled) {
       speakInstruction(instruction);
     }
@@ -42,10 +52,10 @@ export function Generator({ onNewInstruction, isSoundEnabled, onToggleSound }: G
           {currentInstruction ? (
             <div className="space-y-4">
               <p className="text-5xl font-bebas tracking-wider text-white">
-                {formatInstruction(currentInstruction, 'direction')}
+                {formatInstruction(currentInstruction, "direction")}
               </p>
               <p className="text-5xl font-bebas tracking-wider text-white">
-                {formatInstruction(currentInstruction, 'target')}
+                {formatInstruction(currentInstruction, "target")}
               </p>
             </div>
           ) : (

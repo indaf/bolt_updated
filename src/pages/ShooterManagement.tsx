@@ -3,33 +3,24 @@ import { useShooterStore } from "../store/shooterStore";
 import { useResultStore } from "../store/resultStore";
 import {
   Search,
-  Filter,
-  ArrowUpDown,
-  Activity,
-  Users,
-  TrendingDown,
-  Copy,
-  Check,
-  ChevronDown,
-  ChevronRight,
-  Plus,
   CheckCircle2,
   XCircle,
   RefreshCw,
   UserX,
   UserCheck,
+  EyeIcon,
 } from "lucide-react";
-import { AddShooterModal } from "../components/AddShooterModal";
 import Layout from "../components/Layout";
 import { getAllShooters, updateUserById } from "../services/Auth/Auth.service";
 import { notifyError, notifySuccess } from "../helpers/Notify.helper";
 import { AxiosResponse } from "axios";
 import { useNavigate } from "react-router-dom";
+import { ListDocumentModal } from "../components/ListDocumentModal";
+import { deleteMedia } from "../services/Media/media.service";
 
 export function ShooterManagement() {
   const [shooters, setShooters] = useState<Array<any>>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [editingUser, setEditingUser] = useState<string | null>(null);
   const [filterRole, setFilterRole] = useState<
     "all" | "instructor" | "shooter"
   >("all");
@@ -39,6 +30,9 @@ export function ShooterManagement() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pendingInstructors, setPendingInstructors] = useState<Array<any>>([]);
   const navigate = useNavigate();
+  const [selectedInstructor, setSelectedInstructor] = useState<any>(null);
+  const [listDocumentModalIsOpen, setListDocumentModalIsOpen] =
+    useState<boolean>(false);
 
   const filteredUsers = shooters.filter((user) => {
     const matchesSearch = `${user.first_name} ${user.last_name} ${user.email} ${
@@ -72,21 +66,46 @@ export function ShooterManagement() {
       });
   };
 
-  const updatePendingUser = (userId: number, status: boolean) => {
+  const openDocuments = (instructor: any) => {
+    setSelectedInstructor(instructor);
+    setListDocumentModalIsOpen(true);
+  };
+
+  const approvalInstructor = async (userId: number, approuved: boolean) => {
     const user = shooters.find((u) => u.id === userId);
     if (!user) return;
 
-    updateUserById(user.id, { is_active: status, pending: false })
-      .then((_: AxiosResponse) => {
-        notifySuccess("Statut de l'utilisateur mis à jour avec succès");
-        loadShooters();
-      })
-      .catch((err) => {
-        console.error(err);
-        notifyError(
-          "Une erreur est survenue lors de la mise à jour de l'utilisateur"
-        );
+    if (!approuved) {
+      await new Promise(async (resolve) => {
+        for (const doc of user.instructor_doc) {
+          try {
+            const response = await deleteMedia(doc.id);
+          } catch (error) {
+            notifyError("Erreur lors de la suppression des documents");
+            return;
+          }
+        }
+        resolve(true);
       });
+      notifySuccess("Documents refusés.");
+    } else {
+      updateUserById(user.id, {
+        instructor_doc_validated: true,
+        instructor_activated: true,
+      })
+        .then((_: AxiosResponse) => {
+          notifySuccess(
+            "Documents approuvés. Le compte instructeur est activé."
+          );
+          loadShooters();
+        })
+        .catch((err) => {
+          console.error(err);
+          notifyError(
+            "Une erreur est survenue lors de la mise à jour de l'utilisateur"
+          );
+        });
+    }
   };
 
   const loadShooters = () => {
@@ -96,7 +115,9 @@ export function ShooterManagement() {
         setShooters(res.data);
         setPendingInstructors(
           res.data.filter(
-            (u: any) => u.groups[0].name === "instructor" && u.pending === true
+            (u: any) =>
+              u.groups[0].name === "instructor" &&
+              u.instructor_doc_validated != true
           )
         );
         setIsRefreshing(false);
@@ -197,22 +218,33 @@ export function ShooterManagement() {
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() =>
-                                updatePendingUser(instructor.id, true)
+                                approvalInstructor(instructor.id, true)
                               }
                               className="p-1 text-green-500 hover:text-green-400 transition-colors"
-                              title="Activer"
+                              title="Approuver"
                             >
                               <CheckCircle2 className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() =>
-                                updatePendingUser(instructor.id, false)
+                                approvalInstructor(instructor.id, false)
                               }
                               className="p-1 text-red-500 hover:text-red-400 transition-colors"
-                              title="Désactiver"
+                              title="Désapprouver"
                             >
                               <XCircle className="w-4 h-4" />
                             </button>
+                            {instructor.instructor_doc.length > 0 ? (
+                              <button
+                                onClick={() => openDocuments(instructor)}
+                                className="p-1 text-xs text-gray-500 hover:text-gray-400 transition-colors"
+                                title="Voir les documents"
+                              >
+                                <EyeIcon className="w-4 h-4" />
+                              </button>
+                            ) : (
+                              <p className="text-xs">Aucun documents</p>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -357,6 +389,11 @@ export function ShooterManagement() {
           </div>
         </div>
       </div>
+      <ListDocumentModal
+        isOpen={listDocumentModalIsOpen}
+        onClose={() => setListDocumentModalIsOpen(false)}
+        instructor={selectedInstructor}
+      />
     </Layout>
   );
 }

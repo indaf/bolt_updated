@@ -21,6 +21,7 @@ import { addFriend, removeFriend } from "../services/Friend/friend.service";
 import { AxiosResponse } from "axios";
 import { ReportModal } from "./ReportModal";
 import { createReport } from "../services/Report/report.service";
+import { formatTagLink } from "../helpers/TextFormat.helper";
 
 interface PostCardProps {
   post: any;
@@ -179,11 +180,19 @@ export function PostCard({
       {/* Media */}
       {post?.medias && post?.medias.length > 0 && (
         <div className="aspect-square bg-black">
-          <img
-            src={import.meta.env.VITE_SERVICE_API_URL + post?.medias[0].url}
-            alt=""
-            className="w-full h-full object-cover"
-          />
+          {post?.medias[0]?.type === "video" ? (
+            <video
+              src={import.meta.env.VITE_SERVICE_API_URL + post?.medias[0].url}
+              controls
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <img
+              src={import.meta.env.VITE_SERVICE_API_URL + post?.medias[0].url}
+              alt=""
+              className="w-full h-full object-cover"
+            />
+          )}
         </div>
       )}
 
@@ -252,7 +261,12 @@ export function PostCard({
               <span className="font-semibold mr-2">
                 {post.user.first_name} {post.user.last_name}
               </span>
-              {post.content}
+              <span
+                className=""
+                dangerouslySetInnerHTML={{
+                  __html: formatTagLink(post),
+                }}
+              ></span>
             </span>
           </div>
         )}

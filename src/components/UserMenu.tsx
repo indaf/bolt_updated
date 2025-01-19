@@ -5,6 +5,7 @@ import { SettingsModal } from "./SettingsModal";
 import { FAQModal } from "./FAQModal";
 import { User } from "../types/user";
 import { AuthContext } from "../context/Auth.context";
+import { ToolsContext } from "../context/Tools.context";
 
 interface UserMenuProps {
   user: User | null;
@@ -13,7 +14,8 @@ interface UserMenuProps {
 export function UserMenu({ user }: UserMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
-  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const { isSettingsModalOpen, setIsSettingsModalOpen } =
+    useContext<any>(ToolsContext);
   const [isFAQModalOpen, setIsFAQModalOpen] = useState(false);
   const { setUser, setIsAuthenticated } = useContext<any>(AuthContext);
 
@@ -60,7 +62,7 @@ export function UserMenu({ user }: UserMenuProps) {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-1 w-48 bg-[#202123] rounded-lg shadow-lg py-1 z-50">
+        <div className="absolute right-0 mt-1 w-48 bg-[#202123] rounded-lg shadow-lg py-1 z-[1000]">
           <button
             onClick={() => {
               setIsSettingsModalOpen(true);

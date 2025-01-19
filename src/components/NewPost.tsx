@@ -26,12 +26,21 @@ export function NewPost({ userId, refreshPublication }: NewPostProps) {
   const [readedFile, setReadedFile] = useState<Array<any>>([]);
   const location = useLocation();
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [tags, setTags] = useState<Array<any>>([]);
 
   if (!user) return null;
 
   useEffect(() => {
     setContent(location.state?.content);
   }, []);
+
+  useEffect(() => {
+    if (content) {
+      const hashtagRegex = /#[\S]+/g;
+      const foundTags = content.match(hashtagRegex);
+      setTags(foundTags || []);
+    }
+  }, [content]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +58,7 @@ export function NewPost({ userId, refreshPublication }: NewPostProps) {
             const response = await addMedia(data);
             medias.push(response.data.media);
           } catch (error) {
+            setIsLoading(false);
             notifyError("Erreur lors du téléchargement du média");
             return;
           }
@@ -56,10 +66,11 @@ export function NewPost({ userId, refreshPublication }: NewPostProps) {
         resolve(medias);
       });
     }
-    createPublication({ content, medias: medias.map((m: any) => m.id) })
+    createPublication({ content, medias: medias.map((m: any) => m.id), tags })
       .then((response: AxiosResponse) => {
         setFile([]);
         setContent("");
+        setTags([]);
         setReadedFile([]);
         notifySuccess("Publication créée.");
         refreshPublication();
@@ -67,6 +78,7 @@ export function NewPost({ userId, refreshPublication }: NewPostProps) {
       .catch((error: any) => {
         console.error(error);
         notifyError("Erreur lors de la publication");
+        setIsLoading(false);
       })
       .finally(() => {
         setIsLoading(false);
@@ -93,7 +105,8 @@ export function NewPost({ userId, refreshPublication }: NewPostProps) {
 
   return (
     <div className="bg-[#202123] rounded-lg p-3.5">
-      <Spinner isLoading={isLoading} />
+      <Spinner isLoading={isLoading} isMedia={true} />
+
       <div className="flex flex-col md:flex-row gap-4 mb-4">
         <UserAvatar user={user} size="lg" />
         <div className="flex-1">
@@ -107,6 +120,13 @@ export function NewPost({ userId, refreshPublication }: NewPostProps) {
                        text-white placeholder-gray-400 focus:outline-none focus:border-[#009B70]
                        resize-none"
             />
+            <div className="flex justify-start items-center gap-2">
+              {tags.map((tag: any, idx: number) => (
+                <span key={idx} className="text-[#009B70] text-sm">
+                  {tag}
+                </span>
+              ))}
+            </div>
             <div className="flex flex-wrap gap-5">
               {readedFile.map((f: any, idx: number) => {
                 if (f.type === "image") {

@@ -180,13 +180,22 @@ export function BackShootNoShoot() {
                     </div>
                     <div>
                       <p className="text-sm text-gray-400">
-                        Utilisateurs actifs
+                        Taux d'erreur moyen
                       </p>
                       <p className="text-2xl font-medium text-white">
-                        {
-                          new Set(results.map((result: any) => result.user.id))
-                            .size
-                        }
+                        {results.length > 0
+                          ? (
+                              results
+                                .map(
+                                  (result: any) =>
+                                    result.data.incorrect /
+                                    (result.data.nb_target / 100)
+                                )
+                                ?.reduce((prev, curr) => (prev += curr)) /
+                              results.length
+                            ).toFixed(2)
+                          : 0}
+                        %
                       </p>
                     </div>
                   </div>

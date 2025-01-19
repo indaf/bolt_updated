@@ -66,7 +66,7 @@ export function Results({ result, onPlayAgain, onViewStats }: ResultsProps) {
               <div>
                 <p className="text-sm text-gray-400">Temps moyen</p>
                 <p className="text-xl font-medium text-white">
-                  {result.data.averageReactionTime.toFixed(2)}s
+                  {result.data.averageReactionTime?.toFixed(2)}s
                 </p>
               </div>
             </div>

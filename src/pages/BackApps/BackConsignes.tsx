@@ -27,6 +27,7 @@ import { AxiosResponse } from "axios";
 import { calculateChartDataForConsignes } from "../../helpers/Chart.helper";
 import { calculateStatsPerConsigne } from "../../helpers/Object.helper";
 import { ConsigneHistory } from "./components/ConsigneHistory";
+import { formatInstruction } from "../TargetInstructions/utils/instructionUtils";
 
 type Tab = "stats" | "history";
 
@@ -80,9 +81,9 @@ export function BackConsignes() {
           exerciseCount.push({
             appear: 1,
             name:
-              result.data.instruction.target +
+              formatInstruction(result.data.instruction, "target") +
               " - " +
-              result.data.instruction.direction,
+              formatInstruction(result.data.instruction, "direction"),
           });
         }
       });
@@ -276,11 +277,17 @@ export function BackConsignes() {
                           key={ex.exId}
                           className="border-b border-[#343541] cursor-pointer"
                         >
-                          <td>{ex.forme}</td>
-                          <td className="px-4 py-3 text-white">
-                            {ex.direction}
+                          <td>
+                            {ex.forme}
+                            {formatInstruction(ex, "target")}
                           </td>
-                          <td className="px-4 py-3 text-white">{ex.name}</td>
+                          <td className="px-4 py-3 text-white">
+                            {formatInstruction(ex, "direction")}
+                          </td>
+                          <td className="px-4 py-3 text-white">
+                            {formatInstruction(ex, "target")} -{" "}
+                            {formatInstruction(ex, "direction")}
+                          </td>
                           <td className="px-4 py-3 text-white">
                             {ex.displayed}
                           </td>

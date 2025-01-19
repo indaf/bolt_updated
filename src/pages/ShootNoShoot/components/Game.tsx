@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Clock } from "lucide-react";
 import { preloadImgs } from "../../../helpers/Object.helper";
 import useInterval from "../../../hooks/useInterval.hook";
@@ -20,7 +20,7 @@ export function Game({
   onConfigure,
   images,
 }: GameProps) {
-  const [currentTarget, setCurrentTarget] = useState<any | null>(null);
+  const currentTarget = useRef<any | null>(null);
   const [timeLeft, setTimeLeft] = useState<number>(INITIAL_COUNTDOWN);
   const [stats, setStats] = useState({
     correct: 0,
@@ -31,9 +31,13 @@ export function Game({
     reactionTimes: [] as number[],
     processedImages: 0,
   });
-  const [startTime, setStartTime] = useState<number>(0);
+  const start = useRef<number>(0);
   const [remainingTargets, setRemainingTargets] = useState<any[]>([]);
+  const [hasSendScore, setHasSendScore] = useState(false);
   const [gamePhase, setGamePhase] = useState<
+    "initial-countdown" | "playing" | "failed" | "failed-civil"
+  >("initial-countdown");
+  const phase = useRef<
     "initial-countdown" | "playing" | "failed" | "failed-civil"
   >("initial-countdown");
   const [timer, setTimer] = useState<number>(INITIAL_COUNTDOWN);
@@ -53,11 +57,11 @@ export function Game({
 
   useEffect(() => {
     setRemainingTargets(shuffleAndFilterTargets());
-    setStartTime(Date.now());
+    start.current = Date.now();
   }, [shuffleAndFilterTargets]);
 
   const handleRestart = () => {
-    setCurrentTarget(null);
+    currentTarget.current.current(null);
     setTimeLeft(INITIAL_COUNTDOWN);
     setStats({
       correct: 0,
@@ -68,29 +72,34 @@ export function Game({
       images: [],
       processedImages: 0,
     });
+    setHasSendScore(false);
     setGamePhase("initial-countdown");
+    phase.current = "initial-countdown";
     setTimer(INITIAL_COUNTDOWN);
     setRemainingTargets(shuffleAndFilterTargets());
-    setStartTime(Date.now());
+    start.current = Date.now();
   };
 
   const handleShot = (shoot: boolean) => {
-    if (!currentTarget || gamePhase !== "playing") return;
+    if (!currentTarget.current || phase.current !== "playing") return;
+    const reactionTime = (Date.now() - start.current) / 1000;
 
-    const reactionTime = (Date.now() - startTime) / 1000;
-    if (shoot == currentTarget.is_threat) {
+    if (shoot == currentTarget.current.is_threat) {
       setStats((prev) => ({
         ...prev,
         correct: prev.correct + 1,
         images: [
           ...prev.images,
-          { image: currentTarget.id, missed: false, time: reactionTime },
+          {
+            image: currentTarget.current.id,
+            missed: false,
+            time: reactionTime,
+          },
         ],
         reactionTimes: [...prev.reactionTimes, reactionTime],
         processedImages: prev.processedImages + 1,
       }));
     } else {
-      setGamePhase("failed-civil");
       setStats((prev) => ({
         ...prev,
         incorrect: prev.incorrect + 1,
@@ -98,7 +107,7 @@ export function Game({
           prev[shoot ? "falseAlarms" : "missedThreats"] + 1,
         images: [
           ...prev.images,
-          { image: currentTarget.id, missed: true, time: reactionTime },
+          { image: currentTarget.current.id, missed: true, time: reactionTime },
         ],
         processedImages: prev.processedImages + 1,
       }));
@@ -107,27 +116,29 @@ export function Game({
   };
 
   useInterval(() => {
-    if ((Date.now() - startTime) / 1000 > timeLeft) {
+    if ((Date.now() - start.current) / 1000 > timeLeft) {
       if (gamePhase === "initial-countdown") {
         setGamePhase("playing");
-      } else if (gamePhase === "playing" && currentTarget?.is_threat) {
-        setGamePhase("failed");
+        phase.current = "playing";
+        // }
+        // else if (gamePhase === "playing" && currentTarget?.is_threat) {
+        // setGamePhase("failed");
       } else if (gamePhase === "playing") {
         handleTimeout();
       }
     } else {
       if (stats.processedImages < images.length) {
-        setTimer((Date.now() - startTime) / 1000);
+        setTimer((Date.now() - start.current) / 1000);
       }
     }
   }, 10);
 
   useEffect(() => {
-    if (stats.processedImages >= images.length) {
+    if (stats.processedImages >= images.length && !hasSendScore) {
       const averageReactionTime =
         stats.reactionTimes.reduce((a, b) => a + b, 0) /
         stats.reactionTimes.length;
-
+      setHasSendScore(true);
       onGameEnd({
         correct: stats.correct,
         incorrect: stats.incorrect,
@@ -141,39 +152,44 @@ export function Game({
     }
 
     if (remainingTargets.length > 0 && gamePhase === "playing") {
-      setCurrentTarget(remainingTargets[0]);
+      currentTarget.current = remainingTargets[0];
       setTimeLeft(settings.timeLimit);
       setTimer(settings.timeLimit);
-      setStartTime(Date.now());
+      start.current = Date.now();
     }
   }, [remainingTargets, stats.processedImages, gamePhase]);
 
   const handleTimeout = () => {
     if (!currentTarget) return;
 
-    if (currentTarget.is_threat) {
-      setStats((prev) => ({
-        ...prev,
-        images: [
-          ...prev.images,
-          { image: currentTarget.id, missed: true, time: 0 },
-        ],
-        missedThreats: prev.missedThreats + 1,
-        incorrect: prev.incorrect + 1,
-        processedImages: prev.processedImages + 1,
-      }));
+    if (currentTarget.current.is_threat) {
+      if (stats.processedImages < images.length) {
+        setStats((prev) => ({
+          ...prev,
+          images: [
+            ...prev.images,
+            { image: currentTarget.current.id, missed: true, time: 0 },
+          ],
+          missedThreats: prev.missedThreats + 1,
+          incorrect: prev.incorrect + 1,
+          processedImages: prev.processedImages + 1,
+        }));
+        nextTarget();
+      }
     } else {
-      setStats((prev) => ({
-        ...prev,
-        images: [
-          ...prev.images,
-          { image: currentTarget.id, missed: false, time: 0 },
-        ],
-        correct: prev.correct + 1,
-        processedImages: prev.processedImages + 1,
-      }));
+      if (stats.processedImages < images.length) {
+        setStats((prev) => ({
+          ...prev,
+          images: [
+            ...prev.images,
+            { image: currentTarget.current.id, missed: false, time: 0 },
+          ],
+          correct: prev.correct + 1,
+          processedImages: prev.processedImages + 1,
+        }));
+      }
+      nextTarget();
     }
-    nextTarget();
   };
 
   const nextTarget = () => {
@@ -187,9 +203,11 @@ export function Game({
   }, []);
 
   useEffect(() => {
-    window.addEventListener("keypress", handleKeyPress);
-    return () => window.removeEventListener("keypress", handleKeyPress);
-  }, [handleKeyPress]);
+    document.addEventListener("keydown", handleKeyPress);
+    return () => {
+      document.removeEventListener("keydown", handleKeyPress);
+    };
+  }, []);
 
   if (gamePhase === "failed" || gamePhase === "failed-civil") {
     return (
@@ -244,9 +262,11 @@ export function Game({
           gamePhase === "initial-countdown" ? null : handleShot(true)
         }
       >
-        {gamePhase !== "initial-countdown" && currentTarget && (
+        {gamePhase !== "initial-countdown" && currentTarget.current && (
           <img
-            src={import.meta.env.VITE_SERVICE_API_URL + currentTarget.url}
+            src={
+              import.meta.env.VITE_SERVICE_API_URL + currentTarget.current.url
+            }
             alt="Target"
             className="w-full h-full object-contain"
           />

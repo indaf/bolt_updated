@@ -15,7 +15,7 @@ export function ExerciseCard({ exercise, onClick }: ExerciseCardProps) {
     >
       <div className="p-3 flex flex-col flex-1">
         <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="font-medium text-[#009B70] line-clamp-2">
+          <h3 className="font-medium text-red-500 line-clamp-2">
             {exercise.name}
           </h3>
           <div className="flex items-center text-yellow-500">

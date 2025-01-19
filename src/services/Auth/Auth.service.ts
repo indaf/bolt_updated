@@ -78,3 +78,15 @@ export const searchShooter = (search: string) => {
 export const searchProfile = (search: string) => {
   return API.get(`/user/search?query=${search}`);
 };
+
+export const resendActivationMail = (email: string) => {
+  return API.post(`/user/resend-activation`, { email });
+};
+
+export const upgradeAccountToInstructor = () => {
+  return API.get(`/user/upgrade-instructor`);
+};
+
+export const checkTagExist = (tag: string) => {
+  return API.get("/user/check-tag-exist?tag=" + tag);
+};

@@ -1,64 +1,83 @@
-import React from 'react';
-import { Heart, Share2, ShoppingBag } from 'lucide-react';
-import { Product } from '../../types/shop';
-import { likeProduct, unlikeProduct } from '../../services/Shop/product.service';
-import { notifyError, notifySuccess } from '../../helpers/Notify.helper';
+import React from "react";
+import { Heart, Share2, ShoppingBag } from "lucide-react";
+// import { likeProduct, unlikeProduct } from '../../services/Shop/product.service';
+import { notifyError, notifySuccess } from "../../helpers/Notify.helper";
+import { addLikeProduct } from "../../services/Like/like.service";
+import { handleClickProduct } from "../../services/Shop/shop.service";
 
 interface ProductCardProps {
-  product: Product;
+  product: any;
   currentUserId: string;
   onProductUpdated: () => void;
 }
 
-export function ProductCard({ product, currentUserId, onProductUpdated }: ProductCardProps) {
-  const isLiked = product.likes.includes(currentUserId);
+export function ProductCard({
+  product,
+  currentUserId,
+  onProductUpdated,
+}: ProductCardProps) {
+  const isLiked =
+    product.likes.filter((like: any) => like.user.id == currentUserId).length >
+    0;
 
   const handleLike = async () => {
     try {
-      if (isLiked) {
-        await unlikeProduct(parseInt(product.id));
-      } else {
-        await likeProduct(parseInt(product.id));
-      }
+      await addLikeProduct({ product_id: product.id });
       onProductUpdated();
     } catch (error) {
       console.error(error);
-      notifyError('Erreur lors de la mise à jour du like');
+      notifyError("Erreur lors de la mise à jour du like");
+    }
+  };
+
+  const handleClick = async (event: any) => {
+    try {
+      await handleClickProduct(product.id);
+    } catch (error) {
+      console.error(error);
     }
   };
 
   const handleShare = () => {
-    navigator.clipboard.writeText(product.url)
-      .then(() => notifySuccess('Lien copié dans le presse-papier'))
-      .catch(() => notifyError('Erreur lors de la copie du lien'));
+    navigator.clipboard
+      .writeText(product.url_product)
+      .then(() => notifySuccess("Lien copié dans le presse-papier"))
+      .catch(() => notifyError("Erreur lors de la copie du lien"));
   };
 
   return (
     <div className="bg-[#202123] rounded-lg overflow-hidden flex flex-col h-full transform transition-transform duration-300 hover:scale-[1.02]">
-      <div className="aspect-video">
-        <img 
-          src={import.meta.env.VITE_SERVICE_API_URL + product.image} 
+      <div className="aspect-video h-[300px]">
+        <img
+          src={import.meta.env.VITE_SERVICE_API_URL + product.image_path}
           alt={product.name}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover object-top"
         />
       </div>
-      
+
       <div className="p-6 flex-1 flex flex-col">
         <h3 className="text-xl font-medium text-white mb-2">{product.name}</h3>
-        <p className="text-gray-400 text-sm mb-4 flex-1">{product.description}</p>
-        <p className="text-2xl font-bold text-[#009B70] mb-4">{product.price.toFixed(2)} €</p>
-        
+        <p className="text-gray-400 text-sm mb-4 flex-1">
+          {product.description}
+        </p>
+        <p className="text-2xl font-bold text-[#009B70] mb-4">
+          {product.price} €
+        </p>
+
         <div className="flex items-center justify-between mt-auto">
           <div className="flex items-center gap-2">
             <button
               onClick={handleLike}
-              className={`p-2 rounded-lg transition-colors ${
+              className={`p-2 rounded-lg flex items-center justify-center gap-2 ${
                 isLiked
-                  ? 'text-red-500 bg-red-500/10'
-                  : 'text-gray-400 hover:text-white'
+                  ? "text-red-500 bg-red-500/10"
+                  : "text-gray-400 hover:text-white"
               }`}
             >
               <Heart className="w-5 h-5" />
+              <span className={`${isLiked ? "text-red-500" : "text-gray-400"}`}>
+                {product.likes.length}
+              </span>
             </button>
             <button
               onClick={handleShare}
@@ -67,12 +86,13 @@ export function ProductCard({ product, currentUserId, onProductUpdated }: Produc
               <Share2 className="w-5 h-5" />
             </button>
           </div>
-          
+
           <a
-            href={product.url}
+            onClick={handleClick}
+            href={product.url_product}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-2 px-4 py-2 bg-[#009B70] text-white rounded-lg hover:bg-[#007B56] transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-[#009B70] text-white rounded-lg hover:bg-[#007B56] transition-colors cursor-pointer"
           >
             <ShoppingBag className="w-4 h-4" />
             <span className="hidden sm:inline">Obtenir</span>

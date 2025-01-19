@@ -35,7 +35,7 @@ export function Header({ onMenuClick }: HeaderProps) {
   };
 
   return (
-    <header className="bg-[#101010] border-b border-[#242424] w-full">
+    <header className="bg-[#131415] border-b border-[#242424] w-full">
       <div className="container mx-auto px-4 py-4 lg:py-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -43,7 +43,7 @@ export function Header({ onMenuClick }: HeaderProps) {
               <Menu className="w-5 h-5" />
             </button>
             <img
-              src="/cdtarget-logo.svg"
+              src="/cdtarget-logo.png"
               alt="CDTARGET Logo"
               className="w-8 h-8 text-[#DC002B]"
             />
@@ -66,7 +66,7 @@ export function Header({ onMenuClick }: HeaderProps) {
                 onClick={() => setIsLoginModalOpen(true)}
                 className="btn btn-secondary flex items-center gap-2"
               >
-                <img src="/cdtarget-logo.svg" alt="" className="w-4 h-4" />
+                <img src="/cdtarget-logo.png" alt="" className="w-4 h-4" />
                 <span>Se connecter</span>
               </button>
             )}

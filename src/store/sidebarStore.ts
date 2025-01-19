@@ -8,12 +8,16 @@ interface SidebarStore {
   toggle: () => void;
   setOpen: (open: boolean) => void;
   setOpenMobile: (open: boolean) => void;
+  reduceAlert: (value: boolean) => void;
+  isReduceAlert: boolean;
 }
 
 export const useSidebarStore = create<SidebarStore>()(
   persist(
     (set) => ({
       isOpen: true,
+      isReduceAlert: false,
+      reduceAlert: (value: boolean) => set({ isReduceAlert: value }),
       isOpenMobile: false,
       toggle: () => set((state) => ({ isOpen: !state.isOpen })),
       toggleMobile: () =>

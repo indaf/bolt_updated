@@ -31,11 +31,19 @@ export const PostGridItem = memo(function PostGridItem({
             {post.pinned && (
               <PinIcon className="absolute top-2 right-2 w-5 h-5 rotate-45 text-white" />
             )}
-            <img
-              src={import.meta.env.VITE_SERVICE_API_URL + post.medias[0].url}
-              alt=""
-              className="w-full h-full object-cover"
-            />
+            {post.medias?.[0].type === "video" ? (
+              <video
+                src={import.meta.env.VITE_SERVICE_API_URL + post.medias[0].url}
+                className="w-full h-full object-cover"
+                controls
+              />
+            ) : (
+              <img
+                src={import.meta.env.VITE_SERVICE_API_URL + post.medias[0].url}
+                alt=""
+                className="w-full h-full object-cover"
+              />
+            )}
             {post.medias.length > 1 && (
               <div className="absolute top-2 right-2">
                 <ImageIcon className="w-5 h-5 text-white" />

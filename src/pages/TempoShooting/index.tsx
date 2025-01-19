@@ -70,7 +70,7 @@ export function TempoShooting() {
     <Layout pageTitle="Tempo Shooting">
       <div className="flex flex-col h-full">
         {/* Navigation fixe avec z-index élevé */}
-        <div className="bg-[#0C0C0C] border-b border-[#242424] sticky top-0 z-50">
+        <div className="bg-[#131415] border-b border-[#242424] sticky top-0 z-50">
           <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto">
               <div className="flex items-center justify-between py-6 flex-col md:flex-row">

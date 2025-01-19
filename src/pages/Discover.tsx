@@ -12,12 +12,10 @@ import { AxiosResponse } from "axios";
 import { notifyError } from "../helpers/Notify.helper";
 import { ICON_ACHIEVEMENTS } from "../const/ACHIEVEMENT.const";
 import { getUserProfile } from "../services/Profile/profile.service";
-import {
-  getFriendsPublications,
-  getPublicPublications,
-} from "../services/Publication/publication.service";
 import { searchProfile } from "../services/Auth/Auth.service";
 import { useNavigate } from "react-router-dom";
+import { searchPostTags } from "../services/PostTags/PostTags.service";
+import { useLocation } from "react-router-dom";
 
 type FilterType = "all" | "suggestions" | "following" | "achievements";
 
@@ -27,13 +25,17 @@ export function Discover() {
   const [filter, setFilter] = useState<FilterType>("all");
   const [activitySubscriber, setActivitySubscriber] = useState<Array<any>>([]);
   const [activityPublic, setActivityPublic] = useState<Array<any>>([]);
-  const [publicPosts, setPublicPosts] = useState<Array<any>>([]);
-  const [friendsPost, setFriendsPost] = useState<Array<any>>([]);
   const [allActivities, setAllActivities] = useState<Array<any>>([]);
   const [profile, setProfile] = useState<any>(null);
   const toSearch = useRef<any>(null);
   const [foundProfile, setFoundProfile] = useState<Array<any>>([]);
+  const [foundTags, setFoundTags] = useState<Array<any>>([]);
   const navigate = useNavigate();
+
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const tagParam = queryParams.get("tag");
+  const tagParamName = queryParams.get("tagname");
 
   const loadCurrentUserProfile = () => {
     if (user) {
@@ -49,6 +51,8 @@ export function Discover() {
   };
 
   useEffect(() => {
+    setFoundProfile([]);
+    setFoundTags([]);
     if (searchTerm[0] == "@") {
       if (searchTerm.length > 3) {
         clearTimeout(toSearch.current);
@@ -57,6 +61,21 @@ export function Discover() {
           searchProfile(searchTerm.slice(1))
             .then((response: AxiosResponse) => {
               setFoundProfile(response.data);
+            })
+            .catch((error: any) => {
+              console.error(error);
+              notifyError("Erreur lors de la recherche de profil");
+            });
+        }, 500);
+      }
+    } else if (searchTerm[0] == "#") {
+      if (searchTerm.length > 3) {
+        clearTimeout(toSearch.current);
+        toSearch.current = setTimeout(() => {
+          clearTimeout(toSearch.current);
+          searchPostTags(searchTerm)
+            .then((response: AxiosResponse) => {
+              setFoundTags(response.data);
             })
             .catch((error: any) => {
               console.error(error);
@@ -73,7 +92,6 @@ export function Discover() {
     getPublicAchievements()
       .then((response: AxiosResponse) => {
         setActivityPublic(response.data);
-        console.log(response.data);
       })
       .catch((error: any) => {
         console.error(error);
@@ -203,11 +221,18 @@ export function Discover() {
       });
     }
 
-    const uniqueActivities = all.filter(
+    let uniqueActivities = all.filter(
       (activity, index, self) =>
         index ===
         self.findIndex((a) => a.id === activity.id && a.type === activity.type)
     );
+    if (tagParam) {
+      uniqueActivities = uniqueActivities.filter(
+        (activity) =>
+          activity.data?.tags?.filter((tag: any) => tag.id == tagParam).length >
+          0
+      );
+    }
     setAllActivities(uniqueActivities);
   };
 
@@ -215,14 +240,12 @@ export function Discover() {
     loadPublicAchievements();
     loadFriendsAchievements();
     loadCurrentUserProfile();
-    // loadPublicPosts();
-    // loadFriendPost();
   }, []);
 
   useEffect(() => {
     setAllActivities([]);
     formatAllActivities();
-  }, [activitySubscriber, activityPublic, filter, searchTerm]);
+  }, [activitySubscriber, activityPublic, filter, searchTerm, tagParam]);
 
   return (
     <Layout pageTitle="Accueil">
@@ -232,6 +255,7 @@ export function Discover() {
           <div className="flex justify-center mb-8">
             <div className="relative w-96">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+
               <input
                 type="text"
                 placeholder="Rechercher..."
@@ -266,43 +290,87 @@ export function Discover() {
                   ))}
                 </div>
               )}
+              {searchTerm.length > 3 && foundTags.length > 0 && (
+                <div className="absolute top-full bg-[#202123] w-full h-[500px] rounded-xl">
+                  {foundTags.map((tag: any) => (
+                    <div
+                      key={tag.id}
+                      onClick={() => {
+                        navigate(
+                          `/discover?tag=${tag.id}&tagname=${tag.name.slice(1)}`
+                        );
+                        setFoundTags([]);
+                        setSearchTerm("");
+                      }}
+                      className="flex items-center gap-4 p-4 border-b cursor-pointer hover:bg-[#343541] border-b-[#343541]"
+                    >
+                      <div>
+                        <p className="text-white">
+                          <span className="font-medium">{tag.name}</span>
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
           {/* Filtres */}
           <DiscoverFilters currentFilter={filter} onFilterChange={setFilter} />
-
+          {tagParam && (
+            <div className="flex w-full">
+              <div className="flex items-center py-1 px-2 rounded-lg text-xs mb-4 text-white/20 italic gap-10">
+                <span className="">
+                  Résultats de recherche pour : #{tagParamName}
+                </span>
+                <span
+                  className="underline cursor-pointer hover:text-white/50"
+                  onClick={() => navigate("/discover")}
+                >
+                  Réinitialiser la recherche
+                </span>
+              </div>
+            </div>
+          )}
           {/* Feed */}
           <div className="space-y-6">
             {allActivities.length > 0 ? (
-              allActivities.map((activity) => (
-                <div
-                  key={`${activity.type}-${
-                    activity.type === "post"
-                      ? activity.data.id
-                      : activity.data.id
-                  }`}
-                >
-                  {activity.type === "post" ? (
-                    <PostCard
-                      key={activity.id}
-                      refreshPublication={() => {
-                        loadCurrentUserProfile();
-                        loadPublicAchievements();
-                        loadFriendsAchievements();
-                      }}
-                      post={activity.data}
-                      currentUserId={user.id}
-                      currentUserProfile={profile}
-                    />
-                  ) : (
-                    <AchievementCard
-                      achievement={activity.data}
-                      user={activity.user}
-                    />
-                  )}
-                </div>
-              ))
+              allActivities
+                .sort((a, b) =>
+                  new Date(a.data.created_at).getTime() <
+                  new Date(b.data.created_at).getTime()
+                    ? 1
+                    : -1
+                )
+                .map((activity) => (
+                  <div
+                    key={`${activity.type}-${
+                      activity.type === "post"
+                        ? activity.data.id
+                        : activity.data.id
+                    }`}
+                  >
+                    {activity.type === "post" ? (
+                      <PostCard
+                        key={activity.id}
+                        refreshPublication={() => {
+                          loadCurrentUserProfile();
+                          loadPublicAchievements();
+                          loadFriendsAchievements();
+                        }}
+                        post={activity.data}
+                        currentUserId={user.id}
+                        currentUserProfile={profile}
+                      />
+                    ) : (
+                      <AchievementCard
+                        achievement={activity.data}
+                        user={activity.user}
+                      />
+                    )}
+                  </div>
+                ))
             ) : (
               <div className="bg-[#202123] rounded-lg p-8 text-center">
                 <p className="text-gray-400">

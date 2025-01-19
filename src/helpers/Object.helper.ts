@@ -182,7 +182,7 @@ export const calculateStatsPerConsigne = (results: any) => {
           " - " +
           result.data.instruction.direction,
         displayed: 0,
-        forme: result.data.instruction.target,
+        target: result.data.instruction.target,
         direction: result.data.instruction.direction,
       });
     }

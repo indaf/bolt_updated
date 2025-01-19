@@ -1,5 +1,5 @@
-import React, { memo } from 'react';
-import { Heart, MessageCircle, Send } from 'lucide-react';
+import React, { memo } from "react";
+import { Heart, MessageCircle, Send } from "lucide-react";
 
 interface PostActionsProps {
   isLiked: boolean;
@@ -16,25 +16,25 @@ export const PostActions = memo(function PostActions({
   onLike,
   comment,
   onCommentChange,
-  onCommentSubmit
+  onCommentSubmit,
 }: PostActionsProps) {
   return (
     <div className="p-4 border-t border-[#343541]">
-      <div className="flex items-center gap-4 mb-4">
+      <div className="flex items-center gap-4 mb-4 ">
         <button
           onClick={onLike}
-          className={`text-2xl ${
-            isLiked ? 'text-red-500' : 'text-gray-400 hover:text-white'
+          className={`text-2xl pc  ${
+            isLiked ? "text-red-500" : "text-gray-400 hover:text-white"
           }`}
         >
           <Heart className="w-6 h-6" />
         </button>
-        <button className="text-gray-400 hover:text-white">
+        <button className="text-gray-400 hover:text-white pc">
           <MessageCircle className="w-6 h-6" />
         </button>
       </div>
-      <p className="font-medium text-white mb-2">
-        {likesCount} {likesCount === 1 ? 'like' : 'likes'}
+      <p className="font-medium text-white mb-2 pc">
+        {likesCount} {likesCount === 1 ? "like" : "likes"}
       </p>
 
       <form onSubmit={onCommentSubmit} className="flex gap-2">

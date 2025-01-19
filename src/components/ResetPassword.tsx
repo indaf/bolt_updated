@@ -70,7 +70,7 @@ export function ResetPassword() {
   };
 
   return (
-    <div className="h-full bg-[#0C0C0C] flex items-center justify-center p-4">
+    <div className="h-full bg-[#131415] flex items-center justify-center p-4">
       <div className="bg-[#202123] rounded-lg p-8 max-w-md w-full">
         {status === "form" && (
           <>

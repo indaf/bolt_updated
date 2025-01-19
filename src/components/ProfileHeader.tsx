@@ -119,7 +119,7 @@ export function ProfileHeader({
       <div className="flex flex-col md:flex-row items-center gap-8">
         {/* Avatar */}
         <div className="relative">
-          <div className="w-32 h-32 rounded-full overflow-hidden bg-[#009B70] ring-4 ring-[#0C0C0C]">
+          <div className="w-32 h-32 rounded-full overflow-hidden bg-[#009B70] ring-4 ring-[#131415]">
             {profile.user.avatar ? (
               <img
                 src={import.meta.env.VITE_SERVICE_API_URL + profile.user.avatar}
@@ -158,8 +158,7 @@ export function ProfileHeader({
               </div>
               <div className="inline-flex items-center px-2 py-1 bg-[#343541] rounded-full mt-1">
                 <span className="text-sm text-gray-400">
-                  @{profile.user.first_name.toLowerCase()}
-                  {profile.user.last_name.toLowerCase()}
+                  @{profile.user?.tag_name}
                 </span>
               </div>
               {profile.bio && (

@@ -17,3 +17,16 @@ export const generateRandomString = (length: number) => {
   }
   return result;
 };
+
+export const formatTagLink = (post: any) => {
+  let newContent = post.content;
+  post?.tags?.forEach((tag: any) => {
+    newContent = newContent.replace(
+      new RegExp(`${tag.name}`, "g"),
+      `<a href="/discover?tag=${tag.id}&tagname=${tag.name.slice(
+        1
+      )}" class="text-blue-500">${tag.name}</a>`
+    );
+  });
+  return newContent;
+};

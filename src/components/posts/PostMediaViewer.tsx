@@ -1,11 +1,13 @@
 import React, { useState, memo } from "react";
 
 interface PostMediaViewerProps {
-  medias: Array<{ url: string }>;
+  medias: any;
+  comIsOpen?: boolean;
 }
 
 export const PostMediaViewer = memo(function PostMediaViewer({
   medias,
+  comIsOpen,
 }: PostMediaViewerProps) {
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
 
@@ -22,16 +24,32 @@ export const PostMediaViewer = memo(function PostMediaViewer({
   };
 
   return (
-    <div className="w-[90%] relative bg-black flex items-center">
-      {medias && medias[currentMediaIndex] && (
-        <img
-          src={
-            import.meta.env.VITE_SERVICE_API_URL + medias[currentMediaIndex].url
-          }
-          alt=""
-          className="w-full h-full object-contain"
-        />
-      )}
+    <div className="w-[90%] relative bg-black flex items-center justify-center">
+      {medias &&
+        medias[currentMediaIndex] &&
+        (medias[currentMediaIndex].type == "video" ? (
+          <video
+            src={
+              import.meta.env.VITE_SERVICE_API_URL +
+              medias[currentMediaIndex].url
+            }
+            controls={true}
+            className={`w-[calc(${!comIsOpen ? "80vh" : "60vh"} / 16)] h-[${
+              !comIsOpen ? "80vh" : "60vh"
+            }] lg:w-[calc(80vh / 16)] lg:h-[80vh] object-contain`}
+          />
+        ) : (
+          <img
+            src={
+              import.meta.env.VITE_SERVICE_API_URL +
+              medias[currentMediaIndex].url
+            }
+            alt=""
+            className={`w-[calc(${!comIsOpen ? "80vh" : "60vh"} / 16)] h-[${
+              !comIsOpen ? "80vh" : "60vh"
+            }] lg:w-[calc(80vh / 16)] lg:h-[80vh] object-contain`}
+          />
+        ))}
       {medias && medias.length > 1 && (
         <>
           {currentMediaIndex > 0 && (

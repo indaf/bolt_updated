@@ -21,6 +21,13 @@ export function GameComponent() {
   const [duration, setDuration] = useState<number>(0);
   const [score, setScore] = useState<number>(0);
 
+  useEffect(() => {
+    const targetElement = document.getElementById("target");
+    if (targetElement) {
+      targetElement.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [gameState]);
+
   const startGame = useCallback(() => {
     const newInstruction = getRandomInstruction();
     setInstruction(newInstruction);
@@ -162,7 +169,10 @@ export function GameComponent() {
           )}
       </div>
 
-      <div className="flex-1 flex items-center justify-center relative">
+      <div
+        id="target"
+        className="flex-1 flex items-center justify-center relative pb-4"
+      >
         <Target
           onShot={handleShot}
           currentShots={currentShots}

@@ -7,6 +7,7 @@ import {
   Compass,
   LayoutGrid,
   Settings,
+  Link2,
 } from "lucide-react";
 import { AuthContext } from "../context/Auth.context";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -38,7 +39,7 @@ export function Sidebar({
   const isInstructor =
     user.groups.findIndex((group: any) => group.name == "instructor") > -1 ||
     isAdmin;
-  const isValidatedInstructor = isInstructor && user.is_active === "active";
+  const isValidatedInstructor = isInstructor && user.instructor_activated;
   const hasInstructorAccess = isValidatedInstructor || isAdmin;
 
   const commonMenuItems = [
@@ -62,15 +63,20 @@ export function Sidebar({
     //   label: "Tchat",
     //   icon: <MessageCircle className="w-5 h-5" />,
     // },
-    // {
-    //   id: "shop",
-    //   label: "Boutique",
-    //   icon: <BiCart className="w-5 h-5" />,
-    // },
+    {
+      id: "shop",
+      label: "Boutique",
+      icon: <BiCart className="w-5 h-5" />,
+    },
     {
       id: "apps",
       label: "Applications",
       icon: <LayoutGrid className="w-5 h-5" />,
+    },
+    {
+      id: "links",
+      label: "Liens",
+      icon: <Link2 className="w-5 h-5" />,
     },
   ];
 

@@ -67,8 +67,9 @@ export function ExerciseResults({ exercise }: ExerciseResultsProps) {
   const handleAddShooter = (e: React.FormEvent) => {
     e.preventDefault();
     createAccount(newShooter)
-      .then((_: AxiosResponse) => {
+      .then((res: AxiosResponse) => {
         notifySuccess("Tireur créé avec succès.");
+        const email = newShooter.email;
         setNewShooter({
           first_name: "",
           last_name: "",
@@ -77,6 +78,14 @@ export function ExerciseResults({ exercise }: ExerciseResultsProps) {
           role: "shooter",
         });
         setShowAddShooter(false);
+        searchShooter(email)
+          .then((response: AxiosResponse) => {
+            setShooters(response.data);
+            setSelectedShooterId(res.data.id);
+          })
+          .catch((error: any) => {
+            console.error(error);
+          });
       })
       .catch((error: any) => {
         console.error(error);
@@ -264,7 +273,9 @@ export function ExerciseResults({ exercise }: ExerciseResultsProps) {
               </div>
               <div>
                 <p className="font-medium text-white">
-                  {selectedShooter.firstName} {selectedShooter.lastName}
+                  {selectedShooter.firstName && selectedShooter.lastName
+                    ? selectedShooter.firstName + " " + selectedShooter.lastName
+                    : selectedShooter.email}
                 </p>
                 <p className="text-sm text-gray-400">
                   {selectedShooter.uniqueId}

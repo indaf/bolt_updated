@@ -72,7 +72,7 @@ export function GenerateExercise() {
   return (
     <Layout pageTitle="Générateur d'exercice">
       <div className="flex flex-col h-full">
-        <div className="bg-[#0C0C0C] border-b border-[#242424]">
+        <div className="bg-[#131415] border-b border-[#242424]">
           <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto">
               <div className="flex flex-col md:flex-row items-center justify-between py-6">

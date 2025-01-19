@@ -99,8 +99,12 @@ export function ExerciseStatistics({ exercise }: ExerciseStatisticsProps) {
                       </div>
                       <div className="text-sm">
                         <p className="text-white">
-                          {result.shooter?.first_name}{" "}
-                          {result.shooter?.last_name}
+                          {result.shooter?.first_name != "" &&
+                          result.shooter?.last_name != ""
+                            ? result.shooter?.first_name +
+                              " " +
+                              result.shooter?.last_name
+                            : result.shooter?.email}
                         </p>
                       </div>
                     </div>

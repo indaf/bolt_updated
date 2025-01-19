@@ -9,17 +9,23 @@ import {
   User,
   Building,
   Shield,
+  Link2,
 } from "lucide-react";
 import { DeleteConfirmationModal } from "./DeleteConfirmationModal";
 import {
+  checkTagExist,
   deleteAccount,
   updateUser,
   updateUserPassword,
+  upgradeAccountToInstructor,
 } from "../services/Auth/Auth.service";
 import { notifyError, notifySuccess } from "../helpers/Notify.helper";
 import { AuthContext } from "../context/Auth.context";
 import { AxiosResponse } from "axios";
-import { ca } from "date-fns/locale";
+import { GrDocument } from "react-icons/gr";
+import { UploadDocumentModal } from "./UploadDocumentModal";
+import { addMedia, deleteMedia } from "../services/Media/media.service";
+import { CgDanger } from "react-icons/cg";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -29,15 +35,16 @@ interface SettingsModalProps {
 
 export function SettingsModal({ isOpen, onClose, user }: SettingsModalProps) {
   const [activeTab, setActiveTab] = useState<
-    "personal" | "professional" | "account" | "privacy"
+    "personal" | "professional" | "account" | "privacy" | "document"
   >("personal");
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const { updateUserInfo, setIsAuthenticated, setUser } =
+  const { updateUserInfo, setIsAuthenticated, setUser, retrieveUser } =
     useContext<any>(AuthContext);
   const [password, setPassword] = useState<string>("");
   const [newPassword, setNewPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
-
+  const [modalUploadDocIsOpen, setModalUploadDocIsOpen] =
+    useState<boolean>(false);
   const [formData, setFormData] = useState({
     first_name: user.first_name || "",
     last_name: user.last_name || "",
@@ -48,14 +55,17 @@ export function SettingsModal({ isOpen, onClose, user }: SettingsModalProps) {
     city: user.city || "",
     country: user.country || "",
     military_id: user.military_id || "",
+    tag_name: user.tag_name || "",
     regiment: user.regiment || "",
     military_unit: user.military_unit || "",
     rank: user.rank || "",
     professional_email: user.professional_email || "",
     professional_phone_number: user.professional_phone_number || "",
   });
+  const [error, setError] = useState<string>("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    setError("");
     e.preventDefault();
     if (activeTab === "account") {
       if (newPassword !== confirmPassword) {
@@ -83,6 +93,14 @@ export function SettingsModal({ isOpen, onClose, user }: SettingsModalProps) {
         }
       }
     } else {
+      if (user.tag_name !== formData.tag_name) {
+        const response = await checkTagExist(formData.tag_name);
+        if (response.data.exist == true) {
+          notifyError("Ce hashtag est déjà utilisé par un autre utilisateur.");
+          setError("Ce hashtag est déjà utilisé par un autre utilisateur.");
+          return;
+        }
+      }
       updateUser(formData)
         .then((_: AxiosResponse) => {
           updateUserInfo();
@@ -97,8 +115,55 @@ export function SettingsModal({ isOpen, onClose, user }: SettingsModalProps) {
     }
   };
 
+  const handleDeleteMedia = (id: number) => {
+    deleteMedia(id)
+      .then((res: AxiosResponse) => {
+        notifySuccess("Votre document a été supprimé avec succès.");
+        retrieveUser();
+      })
+      .catch((error: any) => {
+        console.error(error);
+        notifyError(
+          "Une erreur s'est produite lors de la suppression de votre document."
+        );
+      });
+  };
+
+  const handleUploadDocument = (document: File) => {
+    const fm = new FormData();
+    fm.append("file", document);
+    fm.append("type", "user_document");
+    addMedia(fm)
+      .then((response: AxiosResponse) => {
+        notifySuccess("Votre document a été ajouté avec succès.");
+        setModalUploadDocIsOpen(false);
+        updateUser({
+          instructor_doc: user.instructor_doc
+            ? [
+                ...user.instructor_doc.map((doc: any) => doc.id),
+                response.data.media.id,
+              ]
+            : [response.data.media.id],
+        })
+          .then((res: AxiosResponse) => {
+            retrieveUser();
+          })
+          .catch((error: any) => {
+            console.error(error);
+            notifyError(
+              "Une erreur s'est produite lors de l'ajout de votre document."
+            );
+          });
+      })
+      .catch((error: any) => {
+        console.error(error);
+        notifyError(
+          "Une erreur s'est produite lors de l'ajout de votre document."
+        );
+      });
+  };
+
   const handleDeleteAccount = async () => {
-    // Delete account logic
     deleteAccount()
       .then((res: AxiosResponse) => {
         onClose();
@@ -109,6 +174,21 @@ export function SettingsModal({ isOpen, onClose, user }: SettingsModalProps) {
         console.error(error);
         notifyError(
           "Une erreur s'est produite lors de la suppression de votre compte."
+        );
+      });
+  };
+
+  const upgradeToInstructor = () => {
+    upgradeAccountToInstructor()
+      .then((res: AxiosResponse) => {
+        notifySuccess(
+          "Votre statut a été mis à jour avec succès. Vous êtes désormais un instructeur. Veuillez fournir les documents justificatifs pour valider votre statut."
+        );
+        retrieveUser();
+      })
+      .catch((error: any) => {
+        notifyError(
+          "Une erreur s'est produite lors de la mise à jour de votre statut."
         );
       });
   };
@@ -210,11 +290,34 @@ export function SettingsModal({ isOpen, onClose, user }: SettingsModalProps) {
               <Shield className="w-4 h-4" />
               <span className="hidden lg:inline">Confidentialité</span>
             </button>
+            <button
+              onClick={() => setActiveTab("document")}
+              className={`
+                flex-1 lg:w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs
+                transition-colors duration-200
+                ${
+                  activeTab === "document"
+                    ? "bg-[#009B70] text-white"
+                    : "text-gray-400 hover:bg-[#2A2B32] hover:text-white"
+                }
+              `}
+            >
+              <GrDocument className="w-4 h-4" />
+              <span className="hidden lg:inline">Mes documents</span>
+            </button>
           </nav>
         </div>
 
         {/* Contenu principal */}
         <div className="flex-1 p-4 overflow-y-auto">
+          {error && (
+            <div className="bg-red-500/10 text-sm text-red-500 w-full flex justify-start items-center p-4 rounded-xl mt-4 mb-4">
+              <span className="flex items-center gap-2">
+                <CgDanger className="w-4 h-4" />
+                {error}
+              </span>
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             {activeTab === "personal" && (
               <div className="space-y-4">
@@ -256,6 +359,26 @@ export function SettingsModal({ isOpen, onClose, user }: SettingsModalProps) {
                         className="w-full px-3 py-1.5 bg-[#2A2B32] border border-gray-700 rounded-lg
                                  text-white placeholder-gray-400 focus:outline-none focus:border-[#009B70]"
                       />
+                    </div>
+                    <div className="relative">
+                      <label className="block text-sm font-medium text-gray-300 mb-1">
+                        Hashtag
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.tag_name}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            tag_name: e.target.value,
+                          }))
+                        }
+                        className="w-full px-3 py-1.5 bg-[#2A2B32] border border-gray-700 rounded-lg pl-7
+                                 text-white placeholder-gray-400 focus:outline-none focus:border-[#009B70]"
+                      />
+                      <span className="absolute left-2 top-[50%] text-gray-500">
+                        @
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -490,6 +613,103 @@ export function SettingsModal({ isOpen, onClose, user }: SettingsModalProps) {
               </div>
             )}
 
+            {activeTab === "document" && (
+              <div className="space-y-4">
+                <div>
+                  <h3 className="text-lg font-medium text-white mb-3">
+                    Documents et Justificatifs
+                  </h3>
+                  {user.groups.filter(
+                    (group: any) =>
+                      group.name == "instructor" || group.name == "admin"
+                  ).length > 0 ? (
+                    <>
+                      <div className="grid grid-cols-1 lg:grid-cols-1 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-300 mb-1">
+                            Mes documents Instructeur
+                          </label>
+                          <div className="flex flex-col w-full my-2 gap-1">
+                            {user.instructor_doc?.map(
+                              (doc: any, index: number) => (
+                                <div
+                                  key={index}
+                                  className="bg-[#2A2B32] p-3 rounded-lg flex items-center justify-between"
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <GrDocument className="w-5 h-5 text-[#009B70]" />
+                                    <span className="text-xs text-gray-400">
+                                      {doc.url.split("/").pop()}
+                                    </span>
+                                    <a
+                                      href={
+                                        import.meta.env.VITE_SERVICE_API_URL +
+                                        doc.url
+                                      }
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      <Link2 className="w-4 h-4 text-[#009B70] cursor-pointer" />
+                                    </a>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleDeleteMedia(doc.id);
+                                    }}
+                                    className="text-xs text-red-500 hover:text-red-400 transition-colors"
+                                  >
+                                    Supprimer
+                                  </button>
+                                </div>
+                              )
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="w-full flex justify-end gap-2">
+                        <button
+                          onClick={() => setModalUploadDocIsOpen(true)}
+                          type="button"
+                          className="px-3 py-1.5 text-xs bg-[#009B70] text-white rounded-lg
+                                  hover:bg-[#007B56] transition-colors"
+                        >
+                          Ajouter un document
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="grid grid-cols-1 lg:grid-cols-1 gap-4">
+                      <div className="w-[80%]">
+                        <label className="block text-sm font-medium text-gray-300 mb-1">
+                          Devenir instructeur
+                        </label>
+                        <p className=" text-xs text-gray-400 mt-1">
+                          Vous souhaitez devenir instructeur et faire évoluer
+                          votre compte ?{" "}
+                        </p>
+                        <p className=" text-xs text-gray-400 mt-1">
+                          Cliquez sur le bouton ci-dessous et fournissez les
+                          documents justificatifs pour attester de votre
+                          qualification.
+                        </p>
+                      </div>
+                      <div className="w-full flex justify-end gap-2">
+                        <button
+                          onClick={() => upgradeToInstructor()}
+                          type="button"
+                          className="px-3 py-1.5 text-xs bg-[#009B70] text-white rounded-lg
+                                  hover:bg-[#007B56] transition-colors"
+                        >
+                          Devenir Instructeur
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {activeTab === "account" && (
               <div className="space-y-4">
                 <div>
@@ -666,6 +886,11 @@ export function SettingsModal({ isOpen, onClose, user }: SettingsModalProps) {
         </div>
       </div>
 
+      <UploadDocumentModal
+        isOpen={modalUploadDocIsOpen}
+        onClose={() => setModalUploadDocIsOpen(false)}
+        onConfirm={handleUploadDocument}
+      />
       <DeleteConfirmationModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}

@@ -5,3 +5,7 @@ export const addMedia = (data: any) => {
     headers: { "Content-Type": "multipart/form-data" },
   });
 };
+
+export const deleteMedia = (id: number) => {
+  return API.delete(`/media/delete/${id}`);
+};

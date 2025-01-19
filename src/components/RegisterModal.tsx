@@ -83,37 +83,43 @@ export function RegisterModal({ isOpen, onClose }: RegisterModalProps) {
 
     createAccount(account)
       .then((_: AxiosResponse) => {
-        loginUser({ email: account.email, password: account.password })
-          .then((loginResp: AxiosResponse) => {
-            setShowSuccess(true);
-            const { refresh, access } = loginResp.data;
-            localStorage.setItem("token", access);
-            localStorage.setItem("refresh_token", refresh);
-            retrieveUser();
-            setIsAuthenticated(true);
-            localStorage.setItem("keep_alive", "true");
-            navigate("/discover");
-            notifySuccess("Compte créé avec succès.");
-            onClose();
-          })
-          .catch((error: any) => {
-            notifyError(
-              "Une erreur est survenue lors de la connexion à votre compte."
-            );
-            if (
-              account.role === "instructor" &&
-              error.response.status === 400
-            ) {
-              setError(
-                "Votre compte a été créé. Il n'est cependant pas activé pour le moment. Veuillez contacter CDTarget afin d'activer le compte."
-              );
-            } else {
-              setError(error.message);
-            }
-          })
-          .finally(() => {
-            resetRegisterForm();
-          });
+        // loginUser({ email: account.email, password: account.password })
+        //   .then((loginResp: AxiosResponse) => {
+        //     setShowSuccess(true);
+        //     const { refresh, access } = loginResp.data;
+        //     localStorage.setItem("token", access);
+        //     localStorage.setItem("refresh_token", refresh);
+        //     retrieveUser();
+        //     setIsAuthenticated(true);
+        //     localStorage.setItem("keep_alive", "true");
+        //     navigate("/discover");
+        //     notifySuccess("Compte créé avec succès.");
+        //     onClose();
+        //   })
+        //   .catch((error: any) => {
+        //     notifyError(
+        //       "Une erreur est survenue lors de la connexion à votre compte."
+        //     );
+        //     if (
+        //       account.role === "instructor" &&
+        //       error.response.status === 400
+        //     ) {
+        //       setError(
+        //         "Votre compte a été créé. Il n'est cependant pas activé pour le moment. Veuillez contacter CDTarget afin d'activer le compte."
+        //       );
+        //     } else {
+        //       setError(error.message);
+        //     }
+        //   })
+        //   .finally(() => {
+        //     resetRegisterForm();
+        //   });
+        setShowSuccess(true);
+        notifySuccess(
+          "Compte créé avec succès. Veuillez valider votre compte via le lien envoyé par email."
+        );
+        onClose();
+        resetRegisterForm();
       })
       .catch((error: any) => {
         setError(error.message);

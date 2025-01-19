@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight, Search, Filter } from "lucide-react";
+import { formatInstruction } from "../../TargetInstructions/utils/instructionUtils";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -18,10 +19,10 @@ export function ConsigneHistory({ results }: ConsigneHistoryProps) {
   const filteredHistory = results.filter((entry) => {
     if (
       filters.search &&
-      !entry.data.instruction.direction
+      !formatInstruction(entry.data.instruction, "direction")
         .toLowerCase()
         .includes(filters.search.toLowerCase()) &&
-      !entry.data.instruction.target
+      !formatInstruction(entry.data.instruction, "target")
         .toLowerCase()
         .includes(filters.search.toLowerCase()) &&
       !entry.user.first_name
@@ -34,9 +35,9 @@ export function ConsigneHistory({ results }: ConsigneHistoryProps) {
 
     if (
       filters.name != "" &&
-      entry.data.instruction.target.toLowerCase() +
+      formatInstruction(entry.data.instruction, "target").toLowerCase() +
         " - " +
-        entry.data.instruction.direction.toLowerCase() !=
+        formatInstruction(entry.data.instruction, "direction").toLowerCase() !=
         filters.name.toLowerCase()
     )
       return false;
@@ -142,9 +143,8 @@ export function ConsigneHistory({ results }: ConsigneHistoryProps) {
                   {new Date(entry.date).toLocaleDateString()}
                 </td>
                 <td className="px-4 py-3 text-white">
-                  {entry.data.instruction.target +
-                    " - " +
-                    entry.data.instruction.direction}
+                  {formatInstruction(entry.data.instruction, "target")} -{" "}
+                  {formatInstruction(entry.data.instruction, "direction")}
                 </td>
               </tr>
             ))}

@@ -13,9 +13,7 @@ export function ExerciseModal({ exercise, onClose }: ExerciseModalProps) {
       <div className="bg-[#202123] rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-[#202123] p-4 border-b border-[#262626] flex items-center justify-between z-10">
           <div className="flex items-center gap-4">
-            <h2 className="text-2xl text-[#009B70] font-bold">
-              {exercise.name}
-            </h2>
+            <h2 className="text-2xl text-red-500 font-bold">{exercise.name}</h2>
             <span className="bg-yellow-100 text-[#202123] px-3 py-1 rounded-full text-sm font-medium flex items-center gap-1">
               <Star className="w-4 h-4" />
               {exercise.module.difficulty}
@@ -31,9 +29,9 @@ export function ExerciseModal({ exercise, onClose }: ExerciseModalProps) {
 
         <div className="p-6 space-y-8">
           {/* Images */}
-          <div className="grid md:grid-cols-2 gap-6">
+          {/* <div className="grid md:grid-cols-2 gap-6">
             <div>
-              <h3 className="font-medium mb-2 text-gray-400">
+              <h3 className="font-medium mb-2 text-red-500">
                 Image de l'exercice
               </h3>
               <img
@@ -50,20 +48,20 @@ export function ExerciseModal({ exercise, onClose }: ExerciseModalProps) {
                 className="w-full rounded-lg shadow-md"
               />
             </div>
-          </div>
+          </div> */}
 
           {/* Details */}
           <div className="grid md:grid-cols-2 gap-8">
             <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-semibold mb-2 text-gray-400">
+                <h3 className="text-lg font-semibold mb-2 text-red-500">
                   Objectif
                 </h3>
                 <p className="text-gray-300">{exercise.objective}</p>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold mb-2 text-gray-400">
+                <h3 className="text-lg font-semibold mb-2 text-red-500">
                   Informations
                 </h3>
                 <dl className="space-y-2 text-gray-300">
@@ -89,7 +87,9 @@ export function ExerciseModal({ exercise, onClose }: ExerciseModalProps) {
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold mb-2">Munitions</h3>
+                <h3 className="text-lg font-semibold mb-2 text-red-500">
+                  Munitions
+                </h3>
                 <dl className="space-y-2">
                   <div className="flex items-center gap-2">
                     <dt className="font-medium">Sans contraintes:</dt>
@@ -124,7 +124,7 @@ export function ExerciseModal({ exercise, onClose }: ExerciseModalProps) {
             <div className="space-y-6">
               {exercise?.constraints && (
                 <div>
-                  <h3 className="text-lg font-semibold mb-2 text-gray-400">
+                  <h3 className="text-lg font-semibold mb-2 text-red-500">
                     Contraintes
                   </h3>
                   <ul className="list-disc pl-5 space-y-1">
@@ -133,7 +133,7 @@ export function ExerciseModal({ exercise, onClose }: ExerciseModalProps) {
                         entry[1] && (
                           <li key={index} className="text-gray-300  list-none">
                             <div className="flex flex-col items-start gap-2">
-                              <span className="text-gray-600 font-bold">
+                              <span className="text-red-500 text-sm font-bold">
                                 {entry[0]}
                               </span>
                               <span className="text-gray-400 text-sm">
@@ -149,21 +149,26 @@ export function ExerciseModal({ exercise, onClose }: ExerciseModalProps) {
 
               {exercise?.skills && (
                 <div>
-                  <h3 className="text-lg font-semibold mb-2 text-gray-400">
+                  <h3 className="text-lg font-semibold mb-2 text-red-500">
                     Compétences développées
                   </h3>
                   <div className="space-y-4">
                     {Object.entries(exercise.skills).map(
                       (skill: any, index) =>
-                        skill[1] && (
+                        skill[1] &&
+                        (skill[0].indexOf("_image") < 0 ? (
                           <div
                             key={index}
                             className="bg-[#202123] p-4 rounded-lg"
                           >
-                            <h4 className="font-medium mb-2">{skill[0]}</h4>
+                            <h4 className="font-medium mb-2 text-red-500 text-sm">
+                              {skill[0]}
+                            </h4>
                             <p className="text-sm text-gray-300">{skill[1]}</p>
                           </div>
-                        )
+                        ) : (
+                          <></>
+                        ))
                     )}
                   </div>
                 </div>
@@ -174,7 +179,7 @@ export function ExerciseModal({ exercise, onClose }: ExerciseModalProps) {
           {/* Audio */}
           {exercise.audio && (
             <div>
-              <h3 className="text-lg font-semibold mb-4">Audio</h3>
+              <h3 className="text-lg font-semibold mb-4 text-red-500">Audio</h3>
               <div
                 dangerouslySetInnerHTML={{ __html: exercise.audio.embed }}
                 className="w-full rounded-lg overflow-hidden"

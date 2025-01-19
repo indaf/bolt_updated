@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { X, Upload, Plus } from 'lucide-react';
-import { createProduct } from '../../services/Shop/product.service';
-import { notifyError, notifySuccess } from '../../helpers/Notify.helper';
-import { CreateProductData } from '../../types/shop';
+import React, { useState } from "react";
+import { X, Upload, Plus } from "lucide-react";
+import { notifyError, notifySuccess } from "../../helpers/Notify.helper";
+import { addMedia } from "../../services/Media/media.service";
+import { createProduct } from "../../services/Shop/shop.service";
 
 interface AddProductModalProps {
   isOpen: boolean;
@@ -10,15 +10,20 @@ interface AddProductModalProps {
   onProductAdded: () => void;
 }
 
-export function AddProductModal({ isOpen, onClose, onProductAdded }: AddProductModalProps) {
-  const [formData, setFormData] = useState<Omit<CreateProductData, 'image'>>({
-    name: '',
-    description: '',
-    price: '',
-    url: ''
+export function AddProductModal({
+  isOpen,
+  onClose,
+  onProductAdded,
+}: AddProductModalProps) {
+  const [data, setData] = useState<any>({
+    name: "",
+    description: "",
+    price: "",
+    url_product: "",
+    image_path: "",
   });
   const [image, setImage] = useState<File | null>(null);
-  const [preview, setPreview] = useState<string>('');
+  const [preview, setPreview] = useState<string>("");
 
   if (!isOpen) return null;
 
@@ -37,37 +42,43 @@ export function AddProductModal({ isOpen, onClose, onProductAdded }: AddProductM
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!image) {
-      notifyError('Veuillez sélectionner une image');
+      notifyError("Veuillez sélectionner une image");
       return;
     }
 
-    const price = parseFloat(formData.price);
+    const price = parseFloat(data.price);
     if (isNaN(price) || price <= 0) {
-      notifyError('Veuillez entrer un prix valide');
+      notifyError("Veuillez entrer un prix valide");
       return;
     }
-
-    const data = new FormData();
-    data.append('name', formData.name);
-    data.append('description', formData.description);
-    data.append('price', price.toString());
-    data.append('url', formData.url);
-    data.append('image', image);
 
     try {
+      const fm = new FormData();
+      fm.append("file", image);
+      fm.append("type", "product");
+      const response = await addMedia(fm);
+      data.image_path = response.data.media.url;
       await createProduct(data);
-      notifySuccess('Produit ajouté avec succès');
+      notifySuccess("Produit ajouté avec succès");
       onProductAdded();
+      setData({
+        name: "",
+        description: "",
+        price: "",
+        url_product: "",
+      });
+      setImage(null);
+      setPreview("");
       onClose();
     } catch (error) {
       console.error(error);
-      notifyError('Erreur lors de l\'ajout du produit');
+      notifyError("Erreur lors de l'ajout du produit");
     }
   };
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-[#202123] rounded-lg w-full max-w-2xl p-6 relative">
+      <div className="bg-[#202123] rounded-lg w-full max-w-2xl p-6 relative max-h-[90vh] overflow-y-auto">
         <button
           onClick={onClose}
           className="absolute right-4 top-4 text-gray-400 hover:text-white"
@@ -75,7 +86,9 @@ export function AddProductModal({ isOpen, onClose, onProductAdded }: AddProductM
           <X className="w-5 h-5" />
         </button>
 
-        <h2 className="text-xl font-semibold text-white mb-6">Ajouter un produit</h2>
+        <h2 className="text-xl font-semibold text-white mb-6">
+          Ajouter un produit
+        </h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
@@ -84,9 +97,9 @@ export function AddProductModal({ isOpen, onClose, onProductAdded }: AddProductM
             </label>
             <div className="relative aspect-video bg-[#2A2B32] rounded-lg overflow-hidden">
               {preview ? (
-                <img 
-                  src={preview} 
-                  alt="Preview" 
+                <img
+                  src={preview}
+                  alt="Preview"
                   className="w-full h-full object-cover"
                 />
               ) : (
@@ -112,8 +125,10 @@ export function AddProductModal({ isOpen, onClose, onProductAdded }: AddProductM
             </label>
             <input
               type="text"
-              value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+              value={data.name}
+              onChange={(e) =>
+                setData((prev: any) => ({ ...prev, name: e.target.value }))
+              }
               className="w-full px-3 py-2 bg-[#2A2B32] border border-gray-700 rounded-lg
                        text-white placeholder-gray-400 focus:outline-none focus:border-[#009B70]"
               required
@@ -125,8 +140,13 @@ export function AddProductModal({ isOpen, onClose, onProductAdded }: AddProductM
               Description
             </label>
             <textarea
-              value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              value={data.description}
+              onChange={(e) =>
+                setData((prev: any) => ({
+                  ...prev,
+                  description: e.target.value,
+                }))
+              }
               className="w-full px-3 py-2 bg-[#2A2B32] border border-gray-700 rounded-lg
                        text-white placeholder-gray-400 focus:outline-none focus:border-[#009B70]
                        resize-none h-32"
@@ -141,11 +161,11 @@ export function AddProductModal({ isOpen, onClose, onProductAdded }: AddProductM
             <input
               type="text"
               pattern="^\d*\.?\d*$"
-              value={formData.price}
+              value={data.price}
               onChange={(e) => {
                 const value = e.target.value;
-                if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                  setFormData(prev => ({ ...prev, price: value }));
+                if (value === "" || /^\d*\.?\d*$/.test(value)) {
+                  setData((prev: any) => ({ ...prev, price: value }));
                 }
               }}
               className="w-full px-3 py-2 bg-[#2A2B32] border border-gray-700 rounded-lg
@@ -160,8 +180,13 @@ export function AddProductModal({ isOpen, onClose, onProductAdded }: AddProductM
             </label>
             <input
               type="url"
-              value={formData.url}
-              onChange={(e) => setFormData(prev => ({ ...prev, url: e.target.value }))}
+              value={data.url_product}
+              onChange={(e) =>
+                setData((prev: any) => ({
+                  ...prev,
+                  url_product: e.target.value,
+                }))
+              }
               className="w-full px-3 py-2 bg-[#2A2B32] border border-gray-700 rounded-lg
                        text-white placeholder-gray-400 focus:outline-none focus:border-[#009B70]"
               required

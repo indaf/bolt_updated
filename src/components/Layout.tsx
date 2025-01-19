@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useContext } from "react";
 import { SEOHelmet } from "./SEOHelmet";
 import { Header } from "./Header";
 import { useSidebarStore } from "../store/sidebarStore";
 import { Sidebar } from "./Sidebar";
 import { useLocation } from "react-router-dom";
+import { AuthContext } from "../context/Auth.context";
+import { CiWarning } from "react-icons/ci";
+import { ToolsContext } from "../context/Tools.context";
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -11,10 +14,24 @@ type LayoutProps = {
 };
 
 const Layout = (props: LayoutProps) => {
-  const { isOpen, toggle, toggleMobile, isOpenMobile } = useSidebarStore();
+  const {
+    isOpen,
+    toggle,
+    toggleMobile,
+    isOpenMobile,
+    isReduceAlert,
+    reduceAlert,
+  } = useSidebarStore();
   const location = useLocation();
+  const { user } = useContext<any>(AuthContext);
+  const { isSettingsModalOpen, setIsSettingsModalOpen } =
+    useContext<any>(ToolsContext);
+  const isInstructorNotValidated =
+    user &&
+    user.groups.filter((group: any) => group.name == "instructor").length > 0 &&
+    !user.instructor_activated;
   return (
-    <div className="h-screen flex flex-col bg-[#0C0C0C] text-white overflow-hidden">
+    <div className="h-screen flex flex-col bg-[#131415] text-white overflow-hidden">
       <SEOHelmet
         title={`CDTARGET - ${props.pageTitle}`}
         description="Plateforme professionnelle pour la gestion et le suivi des exercices de tir."
@@ -27,7 +44,43 @@ const Layout = (props: LayoutProps) => {
       <div className="flex-none mobile">
         <Header onMenuClick={toggleMobile} />
       </div>
-
+      {isInstructorNotValidated && (
+        <div
+          className="bg-red-500/10 text-red-500 flex flex-col justify-center items-center w-full p-2 cursor-pointer"
+          onClick={() => reduceAlert(!isReduceAlert)}
+        >
+          <div className="flex items-center justify-center w-full">
+            <CiWarning className="w-6 h-6" />
+            <p className="text-sm ml-2">
+              Votre compte instructeur n'est pas encore validé. Vous ne pouvez
+              pas encore accéder à toutes les fonctionnalités.
+            </p>
+          </div>
+          {!isReduceAlert && (
+            <div className="flex flex-col items-center justify-center w-full">
+              {user.instructor_doc.length > 0 ? (
+                <p className="text-sm ml-2">
+                  Vos documents sont en cours de validation. Cette validation
+                  prends entre 24 et 48 heures.
+                </p>
+              ) : (
+                <>
+                  <p className="text-sm ml-2">
+                    Afin de valider votre compte instructeur, veuillez nous
+                    envoyer vos documents justificatifs.
+                  </p>
+                  <p
+                    className="underline cursor-pointer text-sm mt-1"
+                    onClick={() => setIsSettingsModalOpen(!isSettingsModalOpen)}
+                  >
+                    Fournir les documents
+                  </p>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      )}
       <div className="flex-1 flex overflow-hidden">
         <div
           className={`pc

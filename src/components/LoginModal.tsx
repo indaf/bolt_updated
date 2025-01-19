@@ -1,9 +1,9 @@
 import React, { useContext, useState } from "react";
 import { X, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { ForgotPasswordModal } from "./ForgotPasswordModal";
-import { loginUser } from "../services/Auth/Auth.service";
+import { loginUser, resendActivationMail } from "../services/Auth/Auth.service";
 import { AuthContext } from "../context/Auth.context";
-import { notifyError } from "../helpers/Notify.helper";
+import { notifyError, notifySuccess } from "../helpers/Notify.helper";
 import { AxiosResponse } from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -23,6 +23,7 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
     rememberMe: false,
   });
   const { retrieveUser, setIsAuthenticated } = useContext<any>(AuthContext);
+  const [showResendMail, setShowResendMail] = useState<boolean>(false);
 
   if (!isOpen) return null;
 
@@ -42,10 +43,34 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
         onClose();
       })
       .catch((error: any) => {
-        notifyError(
-          "Une erreur est survenue lors de la connexion à votre compte."
-        );
-        setError(error.message);
+        if (error.response.data.error == 101) {
+          setShowResendMail(true);
+          notifyError(
+            "Votre compte n'a pas été activé. Veuillez vérifier votre boîte mail."
+          );
+          setError(
+            "Votre compte n'a pas été activé. Veuillez vérifier votre boîte mail."
+          );
+        } else {
+          notifyError(
+            "Une erreur est survenue lors de la connexion à votre compte."
+          );
+          setError(error.response.data.message);
+        }
+      });
+  };
+
+  const handleResendMail = () => {
+    if (!account.email) {
+      notifyError("Veuillez entrer votre email pour renvoyer le mail.");
+      return;
+    }
+    resendActivationMail(account.email)
+      .then((response: AxiosResponse) => {
+        notifySuccess("Le mail d'activation a été renvoyé.");
+      })
+      .catch((error: any) => {
+        notifyError("Une erreur est survenue lors de l'envoi du mail.");
       });
   };
 
@@ -75,6 +100,14 @@ export function LoginModal({ isOpen, onClose }: LoginModalProps) {
             <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg">
               <p className="text-sm text-red-500">{error}</p>
             </div>
+          )}
+          {showResendMail && (
+            <p
+              onClick={handleResendMail}
+              className="text-sm text-red-500 underline cursor-pointer transition-colors hover:text-red-400"
+            >
+              Renvoyez le mail
+            </p>
           )}
 
           <div>

@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  @apply bg-[#0C0C0C] text-white;
+  @apply bg-[#131415] text-white;
   margin: 0;
   padding: 0;
 }
@@ -24,4 +24,16 @@ body {
   .pc {
     display: inherit;
   }
+}
+
+.bg-landing {
+  background-color: hsla(219, 4%, 13%, 1);
+  background-image: radial-gradient(
+      at 1% 97%,
+      hsla(209, 7%, 12%, 1) 0px,
+      transparent 50%
+    ),
+    radial-gradient(at 13% 14%, hsla(215, 7%, 8%, 1) 0px, transparent 50%),
+    radial-gradient(at 88% 9%, hsla(216, 9%, 20%, 1) 0px, transparent 50%),
+    radial-gradient(at 96% 84%, hsla(216, 7%, 7%, 1) 0px, transparent 50%);
 }

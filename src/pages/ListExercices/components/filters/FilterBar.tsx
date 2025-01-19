@@ -39,7 +39,7 @@ export function FilterBar({
   const isTargetModelEnabled = selectedFilters.category === "modèles";
 
   return (
-    <div className="sticky top-14 z-10">
+    <div className="sticky top-14 z-10 bg-[#131415]">
       <div className="max-w-7xl mx-auto px-4 py-2">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>

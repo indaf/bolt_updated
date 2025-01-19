@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { CheckCircle2 } from "lucide-react";
 import { Input } from "./common/Input";
+import { notifyError } from "../helpers/Notify.helper";
 
 interface UploadMediaModal {
   isOpen: boolean;
@@ -29,6 +30,15 @@ export function UploadMediaModal({
 
   const handleUploadFile = (event: any) => {
     const file = event.target.files[0];
+    // Limitation to 100Mo files
+    if (file.size / 1000000 > 100) {
+      notifyError(
+        "Le fichier est trop volumineux. La limite est de 100Mo. Le fichier actuel fait " +
+          (file.size / 1000000).toFixed(2) +
+          "Mo"
+      );
+      return;
+    }
     setUnreadFile(file);
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -57,7 +67,9 @@ export function UploadMediaModal({
         {type === "image" && file ? (
           <img src={file} alt="" className="mt-4 w-[200px] h-[200px]" />
         ) : (
-          file && <video src={file} controls className="mt-4" />
+          file && (
+            <video src={file} controls className="mt-4  max-h-[60vh] w-auto" />
+          )
         )}
         <div className="flex justify-end items-center gap-4 w-full mt-4">
           <button
@@ -70,7 +82,7 @@ export function UploadMediaModal({
           <div className="flex-1" />
           <button
             type="submit"
-            onClick={() => onConfirm(unreadFile, file)}
+            onClick={() => (file ? onConfirm(unreadFile, file) : onClose())}
             className="flex items-center gap-2 px-4 py-2 text-sm bg-[#009B70] text-white rounded-lg
                        hover:bg-[#007B56] transition-colors"
           >

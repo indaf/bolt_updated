@@ -29,7 +29,7 @@ export function ListExercice() {
     null
   );
   const [allExo, setAllExo] = useState<Array<any>>(
-    FORMATTED_EXO.filter((ex) => ex.id != null)
+    FORMATTED_EXO.filter((ex) => ex.id != null && ex.id != "Google drive")
   );
   // Initialiser les filtres avec un tableau vide pour targetModels
   const [selectedFilters, setSelectedFilters] = useState<Filters>({
@@ -38,7 +38,9 @@ export function ListExercice() {
 
   const { filteredExercises, modules, categories, targetModels, weaponTypes } =
     useExerciseFilters({
-      exercises: FORMATTED_EXO.filter((ex) => ex.id != null),
+      exercises: FORMATTED_EXO.filter(
+        (ex) => ex.id != null && ex.id != "Google drive"
+      ),
       searchTerm,
       filters: selectedFilters,
     });
@@ -74,7 +76,7 @@ export function ListExercice() {
     <Layout pageTitle="Tempo Shooting">
       <div className="flex flex-col h-full">
         {/* Navigation fixe avec z-index élevé */}
-        <div className=" border-b border-[#242424] sticky top-0 z-50">
+        <div className=" border-b border-[#242424] sticky top-0 z-50 bg-[#131415]">
           <div className="container mx-auto px-4">
             <div className="max-w-6xl mx-auto">
               <div className="flex items-center justify-between py-6 flex-col md:flex-row">
