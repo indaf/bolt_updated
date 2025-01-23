@@ -1,7 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
 import { File, Plus } from "lucide-react";
-import { useAuthStore } from "../store/authStore";
-import { useCourseStore } from "../store/courseStore";
 import { CourseItem } from "../types/course";
 import { SEOHelmet } from "../components/SEOHelmet";
 import { CourseList } from "../components/CourseList";
@@ -19,17 +17,36 @@ import {
 } from "../services/Course/course.service";
 import { AxiosResponse } from "axios";
 import { notifyError, notifySuccess } from "../helpers/Notify.helper";
+import {
+  addFolder,
+  deleteFolderById,
+  getAllFolders,
+  updateFolderById,
+} from "../services/Folders/folders.service";
+import { AddFolderModal } from "../components/AddFolderModal";
+import { FolderList } from "../components/FolderList";
+import { DeleteFolderModal } from "../components/DeleteFolderModal";
 
 export default function Courses() {
   const { user } = useContext<any>(AuthContext);
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showAddFolderModal, setShowAddFolderModal] = useState(false);
   const [courses, setCourses] = useState<Array<any>>([]);
   const [showDeleteModal, setShowDeleteModal] = useState<number | null>(null);
+  const [showDeleteFolderModal, setShowDeleteFolderModal] = useState<
+    number | null
+  >(null);
+  const [allFolders, setAllFolders] = useState<Array<any>>([]);
+  const [currentFolder, setCurrentFolder] = useState<any>(null);
   const [activeSection, setActiveSection] = useState<"public" | "private">(
     "public"
   );
+  const [currentCourseDrag, setCurrentCourseDrag] = useState<any>(null);
+  const [currentFolderDrag, setCurrentFolderDrag] = useState<any>(null);
+  const [depositDrag, setDepositDrag] = useState<any>(null);
+
   const loadAllCourses = () => {
     getAllCourses()
       .then((response: AxiosResponse) => {
@@ -43,8 +60,41 @@ export default function Courses() {
       });
   };
 
+  const loadAllFolders = () => {
+    getAllFolders()
+      .then((response: AxiosResponse) => {
+        setAllFolders(response.data);
+      })
+      .catch((error: any) => {
+        console.error(error);
+        notifyError(
+          "Une erreur s'est produite lors du chargement des dossiers."
+        );
+      });
+  };
+
+  const calculateCurrentArbo = (): string => {
+    if (!currentFolder) return "";
+    let folder = allFolders.find((f) => f.id === currentFolder.id);
+    let arbo = `${folder.name}`;
+    let hasParent = false;
+    if (folder.parent) {
+      hasParent = true;
+    }
+    while (hasParent) {
+      let findFolder = allFolders.find((f) => f.id === folder.parent);
+      arbo = `${findFolder.name}/${arbo}`;
+      folder = findFolder;
+      if (!folder.parent) {
+        hasParent = false;
+      }
+    }
+    return arbo;
+  };
+
   useEffect(() => {
     loadAllCourses();
+    loadAllFolders();
   }, []);
 
   if (!user) return null;
@@ -57,6 +107,7 @@ export default function Courses() {
       name: data.name,
       is_private: data.is_private,
       content: "",
+      folder: currentFolder ? currentFolder.id : null,
     };
     addCourse(newArticle)
       .then((_: AxiosResponse) => {
@@ -67,6 +118,23 @@ export default function Courses() {
         notifyError("Une erreur s'est produite lors de l'ajout de l'article.");
       });
     setShowAddModal(false);
+  };
+
+  const handleAddFolder = (data: any) => {
+    addFolder({
+      name: data.name,
+      is_private: data.is_private,
+      parent: currentFolder ? currentFolder.id : null,
+    })
+      .then((_: AxiosResponse) => {
+        notifySuccess("Le dossier a été ajouté avec succès.");
+        loadAllFolders();
+        setShowAddFolderModal(false);
+      })
+      .catch((error: any) => {
+        console.error(error);
+        notifyError("Une erreur s'est produite lors de l'ajout du dossier.");
+      });
   };
 
   const handleDeleteArticle = (id: number) => {
@@ -87,6 +155,38 @@ export default function Courses() {
     setShowDeleteModal(null);
   };
 
+  const handleUpdateFolder = (id: number, name: string) => {
+    updateFolderById(id, { name })
+      .then((_: AxiosResponse) => {
+        notifySuccess("Le dossier a été mis à jour avec succès.");
+        loadAllFolders();
+        loadAllCourses();
+      })
+      .catch((error: any) => {
+        console.error(error);
+        notifyError(
+          "Une erreur s'est produite lors de la mise à jour du dossier."
+        );
+      });
+  };
+
+  const handleDeleteFolder = (id: number) => {
+    deleteFolderById(id)
+      .then((_: AxiosResponse) => {
+        notifySuccess("Le dossier a été supprimé avec succès.");
+        loadAllCourses();
+        loadAllFolders();
+        setShowDeleteFolderModal(null);
+      })
+      .catch((error: any) => {
+        console.error(error);
+        notifyError(
+          "Une erreur s'est produite lors de la suppression du dossier."
+        );
+      });
+    setShowDeleteModal(null);
+  };
+
   const handleEditArticle = (id: number, data: Partial<CourseItem>) => {
     updateCourseById(id, data)
       .then((_: AxiosResponse) => {
@@ -102,6 +202,48 @@ export default function Courses() {
           "Une erreur s'est produite lors de la mise à jour de l'article."
         );
       });
+  };
+
+  const handleMoveCourse = () => {
+    if (depositDrag && currentCourseDrag) {
+      updateCourseById(currentCourseDrag.id, {
+        folder: depositDrag == "root" ? null : depositDrag.id,
+      })
+        .then((_: AxiosResponse) => {
+          notifySuccess("L'article a été déplacé avec succès.");
+          loadAllCourses();
+          setCurrentCourseDrag(null);
+          setDepositDrag(null);
+        })
+        .catch((error: any) => {
+          console.error(error);
+          notifyError(
+            "Une erreur s'est produite lors du déplacement de l'article."
+          );
+        });
+    }
+  };
+
+  const handleMoveFolder = () => {
+    console.log(depositDrag, currentFolderDrag);
+    if (depositDrag && currentFolderDrag) {
+      updateFolderById(currentFolderDrag.id, {
+        parent: depositDrag == "root" ? null : depositDrag.id,
+      })
+        .then((_: AxiosResponse) => {
+          notifySuccess("Le dossier a été déplacé avec succès.");
+          loadAllCourses();
+          loadAllFolders();
+          setCurrentFolderDrag(null);
+          setDepositDrag(null);
+        })
+        .catch((error: any) => {
+          console.error(error);
+          notifyError(
+            "Une erreur s'est produite lors du déplacement du dossier."
+          );
+        });
+    }
   };
 
   return (
@@ -130,9 +272,32 @@ export default function Courses() {
               />
             </div>
 
-            <div className="flex-1 overflow-y-auto px-4">
+            <div className="flex-1 overflow-y-auto px-4 flex flex-col">
+              <FolderList
+                allFolders={allFolders}
+                items={allFolders.filter((folder) =>
+                  currentFolder == null
+                    ? folder.parent == null
+                    : folder.parent == currentFolder?.id
+                )}
+                onItemSelect={(folder: any) => setCurrentFolder(folder)}
+                onDelete={(id) => setShowDeleteFolderModal(id)}
+                onEdit={handleUpdateFolder}
+                isAdmin={isAdmin}
+                updateDepositDrag={(folder) => setDepositDrag(folder)}
+                currentUserId={user?.id}
+                activeSection={activeSection}
+                currentFolder={currentFolder}
+                onDrag={(folder) => setCurrentFolderDrag(folder)}
+                onDragEnd={() => handleMoveFolder()}
+              />
               <CourseList
-                items={courses}
+                items={courses.filter((course: any) =>
+                  currentFolder == null
+                    ? course.folder == null
+                    : course.folder?.id == currentFolder?.id
+                )}
+                onDrag={(course) => setCurrentCourseDrag(course)}
                 selectedItem={selectedItem}
                 onItemSelect={setSelectedItem}
                 onDelete={(id) => setShowDeleteModal(id)}
@@ -140,10 +305,13 @@ export default function Courses() {
                 isAdmin={isAdmin}
                 currentUserId={user?.id}
                 activeSection={activeSection}
+                onDragEnd={() => {
+                  handleMoveCourse();
+                }}
               />
             </div>
             {isAdmin && (
-              <div className="p-4 mt-auto">
+              <div className="p-4 mt-auto gap-2 flex flex-col">
                 <button
                   onClick={() => setShowAddModal(true)}
                   className="w-full px-4 py-2 bg-[#009B70] text-white rounded-lg
@@ -151,6 +319,14 @@ export default function Courses() {
                 >
                   <Plus className="w-4 h-4" />
                   Ajouter un article
+                </button>
+                <button
+                  onClick={() => setShowAddFolderModal(true)}
+                  className="w-full px-4 py-2 bg-[#009B70] text-white rounded-lg
+                          hover:bg-[#007B56] transition-colors flex items-center justify-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Ajouter un dossier
                 </button>
               </div>
             )}
@@ -189,10 +365,29 @@ export default function Courses() {
           />
         )}
 
+        {showDeleteFolderModal && (
+          <DeleteFolderModal
+            isOpen={true}
+            onClose={() => setShowDeleteFolderModal(null)}
+            onConfirm={() => handleDeleteFolder(showDeleteFolderModal)}
+            folderName={
+              allFolders.find((f) => f.id == showDeleteFolderModal)?.name || ""
+            }
+          />
+        )}
+
         <AddCourseModal
           isOpen={showAddModal}
           onClose={() => setShowAddModal(false)}
           onAdd={handleAddArticle}
+          activeSection={activeSection}
+        />
+
+        <AddFolderModal
+          currentArborescence={calculateCurrentArbo()}
+          isOpen={showAddFolderModal}
+          onClose={() => setShowAddFolderModal(false)}
+          onAdd={handleAddFolder}
           activeSection={activeSection}
         />
       </div>

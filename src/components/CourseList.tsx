@@ -9,8 +9,10 @@ interface CourseListProps {
   onDelete: (id: number) => void;
   onEdit: (id: number) => void;
   isAdmin: boolean;
+  onDrag: (e: any) => void;
   currentUserId?: string;
   activeSection: "public" | "private";
+  onDragEnd: (e: any) => void;
 }
 
 export function CourseList({
@@ -19,18 +21,23 @@ export function CourseList({
   onItemSelect,
   onDelete,
   onEdit,
+  onDrag,
   isAdmin,
   currentUserId,
   activeSection,
+  onDragEnd,
 }: CourseListProps) {
   const filteredItems = items.filter((item) =>
     activeSection === "public" ? !item.is_private : item.is_private
   );
 
   return (
-    <div className="mt-4 space-y-1">
+    <div className="space-y-1">
       {filteredItems.map((item) => (
         <div
+          onDragStartCapture={(e) => onDrag(item)}
+          draggable
+          onDragEndCapture={onDragEnd}
           key={item.id}
           onClick={() => onItemSelect(item)}
           className={`

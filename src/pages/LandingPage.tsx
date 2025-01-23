@@ -51,7 +51,7 @@ export function LandingPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img
-                src="/cdtarget-logo.svg"
+                src="/cdtarget-logo.png"
                 alt="CDTARGET Logo"
                 className="w-8 h-8 text-[#DC002B]"
               />
@@ -59,9 +59,9 @@ export function LandingPage() {
                 <h1 className="text-xl lg:text-2xl text-[#FE0032] font-bebas">
                   CDTARGET
                 </h1>
-                <p className="text-xs lg:text-sm text-gray-400">
+                {/* <p className="text-xs lg:text-sm text-gray-400">
                   Générateur d'exercices
-                </p>
+                </p> */}
               </div>
             </div>
 
