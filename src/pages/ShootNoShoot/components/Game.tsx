@@ -239,49 +239,95 @@ export function Game({
   // if (!currentTarget) return null;
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="mb-4 flex justify-between items-center flex-col md:flex-row">
-        <div className="flex items-center gap-2 text-white">
-          <Clock className="w-5 h-5" />
-          <span className="text-xl font-medium">
-            {(timeLeft - timer).toFixed(1)}s
-          </span>
-        </div>
-        <div className="text-sm text-gray-400">
-          Image {stats.processedImages + 1} sur {images.length}
-        </div>
-        <div className="text-sm text-gray-400 text-center">
-          Cliquez sur l'image ou appuyez sur la touche "i" pour tirer
-        </div>
-      </div>
-      <div
-        className={`relative aspect-video bg-black rounded-lg overflow-hidden cursor-pointer ${
-          gamePhase === "initial-countdown" ? "pointer-events-none" : ""
-        }`}
-        onClick={() =>
-          gamePhase === "initial-countdown" ? null : handleShot(true)
-        }
-      >
-        {gamePhase !== "initial-countdown" && currentTarget.current && (
-          <img
-            src={
-              import.meta.env.VITE_SERVICE_API_URL + currentTarget.current.url
-            }
-            alt="Target"
-            className="w-full h-full object-contain"
-          />
-        )}
-        {gamePhase === "initial-countdown" && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm">
-            <div className="text-8xl font-bold text-white animate-pulse mb-4">
-              {Math.ceil(timeLeft - timer)}
-            </div>
-            <div className="text-xl text-white">
-              Traitez les individus menaçants
-            </div>
+    <>
+      <div className="max-w-4xl mx-auto mobile h-full">
+        <div className="mb-4 flex justify-between items-center flex-col md:flex-row">
+          <div className="flex items-center gap-2 text-white">
+            <Clock className="w-5 h-5" />
+            <span className="text-xl font-medium">
+              {(timeLeft - timer).toFixed(1)}s
+            </span>
           </div>
-        )}
+          <div className="text-sm text-gray-400">
+            Image {stats.processedImages + 1} sur {images.length}
+          </div>
+          <div className="text-sm text-gray-400 text-center">
+            Cliquez sur l'image ou appuyez sur la touche "i" pour tirer
+          </div>
+        </div>
+        <div
+          className={`relative aspect-video bg-black rounded-lg overflow-hidden cursor-pointer w-full h-full ${
+            gamePhase === "initial-countdown" ? "pointer-events-none" : ""
+          }`}
+          onClick={() =>
+            gamePhase === "initial-countdown" ? null : handleShot(true)
+          }
+        >
+          {gamePhase !== "initial-countdown" && currentTarget.current && (
+            <img
+              src={
+                import.meta.env.VITE_SERVICE_API_URL + currentTarget.current.url
+              }
+              alt="Target"
+              className="w-full h-auto object-contain"
+            />
+          )}
+          {gamePhase === "initial-countdown" && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm">
+              <div className="text-8xl font-bold text-white animate-pulse mb-4">
+                {Math.ceil(timeLeft - timer)}
+              </div>
+              <div className="text-xl text-white">
+                Traitez les individus menaçants
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+      <div className="max-w-4xl mx-auto pc">
+        <div className="mb-4 flex justify-between items-center flex-col md:flex-row">
+          <div className="flex items-center gap-2 text-white">
+            <Clock className="w-5 h-5" />
+            <span className="text-xl font-medium">
+              {(timeLeft - timer).toFixed(1)}s
+            </span>
+          </div>
+          <div className="text-sm text-gray-400">
+            Image {stats.processedImages + 1} sur {images.length}
+          </div>
+          <div className="text-sm text-gray-400 text-center">
+            Cliquez sur l'image ou appuyez sur la touche "i" pour tirer
+          </div>
+        </div>
+        <div
+          className={`relative aspect-video bg-black rounded-lg overflow-hidden cursor-pointer w-full ${
+            gamePhase === "initial-countdown" ? "pointer-events-none" : ""
+          }`}
+          onClick={() =>
+            gamePhase === "initial-countdown" ? null : handleShot(true)
+          }
+        >
+          {gamePhase !== "initial-countdown" && currentTarget.current && (
+            <img
+              src={
+                import.meta.env.VITE_SERVICE_API_URL + currentTarget.current.url
+              }
+              alt="Target"
+              className="w-full h-full object-contain"
+            />
+          )}
+          {gamePhase === "initial-countdown" && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/50 backdrop-blur-sm">
+              <div className="text-8xl font-bold text-white animate-pulse mb-4">
+                {Math.ceil(timeLeft - timer)}
+              </div>
+              <div className="text-xl text-white">
+                Traitez les individus menaçants
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </>
   );
 }

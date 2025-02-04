@@ -101,17 +101,17 @@ export function Results({ result, onPlayAgain, onViewStats }: ResultsProps) {
           </div>
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex gap-2 md:gap-4">
           <button
             onClick={onPlayAgain}
-            className="flex-1 px-4 py-3 bg-[#009B70] text-white rounded-lg
-                     hover:bg-[#007B56] transition-colors text-lg font-medium"
+            className="flex-1 px-2 gap-2 md:px-4 py-2 bg-[#009B70] text-white rounded-lg text-xs md:text-sm
+                     hover:bg-[#007B56] transition-colors font-medium"
           >
             Rejouer
           </button>
           <button
             onClick={onViewStats}
-            className="flex items-center justify-center gap-2 px-4 py-3 bg-[#343541] text-white rounded-lg
+            className="flex items-center justify-center px-2 gap-2 md:px-4 py-2 bg-[#343541] text-white rounded-lg text-xs md:text-sm
                      hover:bg-[#3E3F4B] transition-colors"
           >
             <BarChart2 className="w-5 h-5" />
@@ -119,7 +119,7 @@ export function Results({ result, onPlayAgain, onViewStats }: ResultsProps) {
           </button>
           <button
             onClick={handleShare}
-            className="flex items-center justify-center gap-2 px-4 py-3 bg-[#343541] text-white rounded-lg
+            className="flex items-center justify-center px-2 gap-2 md:px-4 py-2 bg-[#343541] text-white rounded-lg text-xs md:text-sm
                      hover:bg-[#3E3F4B] transition-colors"
           >
             <Share2 className="w-5 h-5" />

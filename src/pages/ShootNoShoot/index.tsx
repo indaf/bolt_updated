@@ -130,11 +130,11 @@ export function ShootNoShoot() {
                   </p>
                 </div>
 
-                <div className="flex gap-4 flex-col md:flex-row">
+                <div className="flex gap-2 md:gap-4 flex-row">
                   <button
                     onClick={() => setCurrentView("settings")}
                     className={`
-                      flex items-center gap-2 px-4 py-2 rounded-lg transition-colors
+                      flex items-center px-2 gap-2 md:px-4 py-2 rounded-lg transition-colors text-xs md:text-sm
                       ${
                         currentView === "settings"
                           ? "bg-[#009B70] text-white"
@@ -148,7 +148,7 @@ export function ShootNoShoot() {
                   <button
                     onClick={() => handleStartGame(settings)}
                     className={`
-                      flex items-center gap-2 px-4 py-2 rounded-lg transition-colors
+                      flex items-center px-2 gap-2 md:px-4 py-2 rounded-lg transition-colors text-xs md:text-sm
                       ${
                         currentView === "game"
                           ? "bg-[#009B70] text-white"
@@ -162,7 +162,7 @@ export function ShootNoShoot() {
                   <button
                     onClick={() => setCurrentView("history")}
                     className={`
-                      flex items-center gap-2 px-4 py-2 rounded-lg transition-colors
+                      flex items-center px-2 gap-2 md:px-4 py-2 rounded-lg transition-colors text-xs md:text-sm
                       ${
                         currentView === "history"
                           ? "bg-[#009B70] text-white"
